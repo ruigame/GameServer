@@ -1,7 +1,7 @@
-package com.game.player.dao;
+package com.game.logic.player.dao;
 
 import com.game.async.asyncdb.orm.BaseDao;
-import com.game.player.entity.PlayerEntity;
+import com.game.logic.player.entity.PlayerEntity;
 
 import java.util.List;
 import java.util.Map;

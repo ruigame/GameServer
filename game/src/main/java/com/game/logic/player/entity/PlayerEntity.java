@@ -1,10 +1,10 @@
-package com.game.player.entity;
+package com.game.logic.player.entity;
 
 import com.game.async.asyncdb.orm.BaseDBEntity;
 import com.game.async.asyncdb.anotation.Persistent;
 import com.game.async.asynchttp.HttpUtils;
-import com.game.player.dao.PlayerEntityDao;
-import com.game.player.domain.Role;
+import com.game.logic.player.dao.PlayerEntityDao;
+import com.game.logic.player.domain.Role;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;

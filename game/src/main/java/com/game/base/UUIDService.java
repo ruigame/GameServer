@@ -3,7 +3,7 @@ package com.game.base;
 import com.game.base.exception.PlayerIdOverflowException;
 import com.game.base.exception.ServerNotHoldedException;
 import com.game.logic.guild.manager.GuildManager;
-import com.game.player.dao.PlayerEntityDao;
+import com.game.logic.player.dao.PlayerEntityDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -1,4 +1,4 @@
-package com.game.player.domain;
+package com.game.logic.player.domain;
 
 /**
  * @Author: liguorui

@@ -1,7 +1,7 @@
 package com.game.base;
 
 import com.game.net.packet.AbstractPacket;
-import com.game.player.entity.PlayerEntity;
+import com.game.logic.player.entity.PlayerEntity;
 import com.game.thread.message.MessageHandler;
 
 import java.util.concurrent.atomic.AtomicBoolean;

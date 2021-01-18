@@ -1,7 +1,7 @@
-package com.game.player.dao;
+package com.game.logic.player.dao;
 
 import com.game.async.asyncdb.orm.GameDaoSupport;
-import com.game.player.entity.PlayerEntity;
+import com.game.logic.player.entity.PlayerEntity;
 import com.google.common.collect.Maps;
 import org.hibernate.Session;
 import org.hibernate.query.Query;

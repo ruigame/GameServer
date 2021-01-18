@@ -2,7 +2,7 @@ package com.game.base;
 
 import com.game.log.LogAppender;
 import com.game.log.LogEvent;
-import com.game.player.entity.PlayerEntity;
+import com.game.logic.player.entity.PlayerEntity;
 
 /**
  * @Author: liguorui

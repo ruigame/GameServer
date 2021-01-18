@@ -1,12 +1,12 @@
-package com.game.player.manager;
+package com.game.logic.player.manager;
 
 import com.game.async.asyncdb.Synchronizer;
 import com.game.util.GameSession;
-import com.game.player.dao.PlayerEntityDao;
-import com.game.player.domain.Gender;
-import com.game.player.domain.Role;
-import com.game.player.domain.RoleType;
-import com.game.player.entity.PlayerEntity;
+import com.game.logic.player.dao.PlayerEntityDao;
+import com.game.logic.player.domain.Gender;
+import com.game.logic.player.domain.Role;
+import com.game.logic.player.domain.RoleType;
+import com.game.logic.player.entity.PlayerEntity;
 import com.game.util.ExceptionUtils;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -42,7 +42,7 @@ public class PlayerEntityManager implements Synchronizer<PlayerEntity> {
     }
 
     public PlayerEntity createPlayerEntity(GameSession session, int serverId, String account,
-                                           RoleType roleType, Gender gender, long playerId, String name, boolean persistent) {
+                                            long playerId, String name, RoleType roleType, Gender gender, boolean persistent) {
         int x = 0;
         int y = 0;
         int sceneId = 0;

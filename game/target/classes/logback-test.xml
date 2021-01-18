@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 级别从高到低 OFF 、 FATAL 、 ERROR 、 WARN 、 INFO 、 DEBUG 、 TRACE 、 ALL -->
+<!-- 日志输出规则 根据当前ROOT 级别，日志输出时，级别高于root默认的级别时 会输出 -->
+<!-- 以下 每个配置的 filter 是过滤掉输出文件里面，会出现高级别文件，依然出现低级别的日志信息，通过filter 过滤只记录本级别的日志 -->
+<!-- scan 当此属性设置为true时，配置文件如果发生改变，将会被重新加载，默认值为true。 -->
+<!-- scanPeriod 设置监测配置文件是否有修改的时间间隔，如果没有给出时间单位，默认单位是毫秒。当scan为true时，此属性生效。默认的时间间隔为1分钟。 -->
+<!-- debug 当此属性设置为true时，将打印出logback内部日志信息，实时查看logback运行状态。默认值为false。 -->
+<configuration scan="true" scanPeriod="20 seconds">
+
+    <property name ="log.dir"  value="logs"/>
+
+    <appender name="stdoutAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%logger{50}:%line] - %msg%n%ex </pattern>
+        </encoder>
+    </appender>
+
+    <!-- game appender -->
+    <appender name="profile"  class="com.game.framework.logger.DailyFileAppender">
+        <file>${log.dir}/profile.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%logger{50}:%line] - %msg%n%ex </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="asyncProfile"  class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="profile"/>
+    </appender>
+
+    <appender name="socketAppender"  class="com.game.framework.logger.DailyFileAppender">
+        <file>${log.dir}/socket.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%logger{50}:%line] - %msg%n%ex </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="asyncSocketAppender"  class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="socketAppender"/>
+    </appender>
+
+    <appender name="exceptionAppender"  class="com.game.framework.logger.DailyFileAppender">
+        <file>${log.dir}/exception.log</file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+        </filter>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+            <encoder>
+                <charset>UTF-8</charset>
+                <pattern>%level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%logger{50}:%line] - %msg%n%ex </pattern>
+            </encoder>
+    </appender>
+
+    <appender name="exceptionAsyncAppender"  class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="exceptionAppender"/>
+    </appender>
+
+    <appender name="asyndb" class="com.game.framework.logger.DailyFileAppender">
+        <file>${log.dir}/asyndb.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%logger{50}:%line] - %msg%n%ex </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="asyncAsyndb"  class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="asyndb"/>
+    </appender>
+
+    <appender name="online" class="com.game.framework.logger.DailyFileAppender">
+        <file>${log.dir}/online.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%logger{50}:%line] - %msg%n%ex </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="asyncOnline"  class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="online"/>
+    </appender>
+
+    <appender name="networkAppender" class="com.game.framework.logger.DailyFileAppender">
+        <file>${log.dir}/network.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%logger{50}:%line] - %msg%n%ex </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="asyncNetworkAppender"  class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="networkAppender"/>
+    </appender>
+
+    <appender name="adminAppender" class="com.game.framework.logger.DailyFileAppender">
+        <file>${log.dir}/admin.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%logger{50}:%line] - %msg%n%ex </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="asyncAdminAppender"  class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="adminAppender"/>
+    </appender>
+
+
+    <!-- core logger -->
+
+    <logger name="org.apache.commons" level="info" additivity="false">
+        <appender-ref ref="stdoutAppender"/>
+    </logger>
+
+    <logger name="org.apache.http" level="info" additivity="false">
+        <appender-ref ref="stdoutAppender"/>
+    </logger>
+
+    <logger name="org.springframework" level="info" additivity="false">
+        <appender-ref ref="stdoutAppender"/>
+    </logger>
+
+
+    <!-- game logger -->
+
+    <logger name="profileLogger" level="info" additivity="false">
+        <appender-ref ref="asyncProfile"/>
+    </logger>
+
+    <logger name="socketLog" level="info" additivity="false">
+        <appender-ref ref="asyncSocketAppender"/>
+        <appender-ref ref="stdoutAppender"/>
+    </logger>
+
+    <logger name="com.game.framework.asyncdb" level="info" additivity="false">
+        <appender-ref ref="asyncAsyndb"/>
+    </logger>
+
+    <logger name="onlineLogger" level="info" additivity="false">
+        <appender-ref ref="asyncOnline"/>
+    </logger>
+
+    <logger name="com.game.logic.timer" level="info" additivity="false">
+        <appender-ref ref="stdoutAppender"/>
+    </logger>
+
+    <logger name="NetWorkLogger" level="info" additivity="false">
+        <appender-ref ref="asyncNetworkAppender"/>
+    </logger>
+
+    <logger name="AdminLogger" level="info" additivity="false">
+        <appender-ref ref="asyncAdminAppender"/>
+    </logger>
+
+    <logger name="org.hibernate" level="info" additivity="false">
+        <appender-ref ref="stdoutAppender"/>
+    </logger>
+
+    <logger name="io.netty" level="info" additivity="false">
+        <appender-ref ref="stdoutAppender"/>
+    </logger>
+
+    <logger name="com.game.framework.logger.ExceptionUtils" level="warn" additivity="false">
+        <appender-ref ref="exceptionAsyncAppender"/>
+        <appender-ref ref="stdoutAppender"/>
+    </logger>
+
+    <root level="debug">
+        <appender-ref ref="stdoutAppender"/>
+        <appender-ref ref="exceptionAsyncAppender"/>
+    </root>
+
+</configuration>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/container-rank/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/container-rank/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-async/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-async/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-file/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-file/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-generate/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-generate/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-log/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-log/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-net/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-net/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-thread/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-thread/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-timer/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-timer/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-util/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-util/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/game/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/game/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+  </component>
+</project>

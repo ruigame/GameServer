@@ -14,6 +14,8 @@ public class PlayerActor extends MessageHandler<PlayerActor> implements IPlayer<
 
     private PlayerEntity playerEntity;
 
+    private long playerId;
+
     /**
      * 是否登陆
      */
@@ -24,8 +26,16 @@ public class PlayerActor extends MessageHandler<PlayerActor> implements IPlayer<
      */
     private volatile  boolean discardReqPacet;
 
+    /**
+     * 初始化加载模块数据
+     */
+    private volatile boolean init;
+
     public PlayerActor(PlayerEntity playerEntity) {
         this.playerEntity = playerEntity;
+    }
+
+    public PlayerActor() {
     }
 
     public String getAccount() {
@@ -62,5 +72,33 @@ public class PlayerActor extends MessageHandler<PlayerActor> implements IPlayer<
 
     public void setDiscardReqPacet(boolean discardReqPacet) {
         this.discardReqPacet = discardReqPacet;
+    }
+
+    public boolean isInit() {
+        return init;
+    }
+
+    public void setInit(boolean init) {
+        this.init = init;
+    }
+
+    public int getLevel() {
+        return playerEntity.getLevel();
+    }
+
+    public void setPlayerId(long playerId) {
+        this.playerId = playerId;
+    }
+
+    public long getId() {
+        return playerId;
+    }
+
+    public PlayerEntity getPlayerEntity() {
+        return playerEntity;
+    }
+
+    public void setPlayerEntity(PlayerEntity playerEntity) {
+        this.playerEntity = playerEntity;
     }
 }

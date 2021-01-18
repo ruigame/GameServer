@@ -1,16 +1,23 @@
 package com.game.logic.player.entity;
 
-import com.game.async.asyncdb.orm.BaseDBEntity;
 import com.game.async.asyncdb.anotation.Persistent;
+import com.game.async.asyncdb.orm.BaseDBEntity;
 import com.game.async.asynchttp.HttpUtils;
+import com.game.async.asynchttp.example.Player;
+import com.game.base.PlayerActor;
 import com.game.logic.player.dao.PlayerEntityDao;
+import com.game.logic.player.domain.PlayerSkill;
+import com.game.logic.player.domain.ResourceType;
 import com.game.logic.player.domain.Role;
+import com.game.util.Context;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 玩家实体类
@@ -66,6 +73,11 @@ public class PlayerEntity extends BaseDBEntity {
     private long gold;
 
     /**
+     * 代币元宝
+     */
+    private long insteadGold;
+
+    /**
      * 总充值
      */
     private int totalPay;
@@ -90,11 +102,6 @@ public class PlayerEntity extends BaseDBEntity {
     private long loginTime;
 
     /**
-     * 创角ip
-     */
-    private String createIp;
-
-    /**
      * 角色信息
      */
     @Column(columnDefinition = "text COMMENT '角色'", nullable = false)
@@ -104,9 +111,76 @@ public class PlayerEntity extends BaseDBEntity {
     public List<Role> roleList;
 
     /**
+     * 是否在线
+     */
+    private boolean online;
+
+    /**
+     * 上次零点处理时间
+     */
+    private long lastZeroTime;
+
+    /**
+     * 上次充值时间
+     */
+    private long lastRechargeTime;
+
+    /**
+     * 是否充值过标示（0：否 1：是）
+     */
+    private int firstRecharge;
+
+    /**
+     * 创建角色时间
+     */
+    @Column(nullable = false, updatable = false)
+    private long createTime;
+
+    /**
+     * 创建时的IP
+     */
+    @Column(columnDefinition = "char(16)", nullable = false, updatable = false)
+    private String createIp;
+
+    /**
+     * 上次登陆IP
+     */
+    @Column(columnDefinition = "char(16)", nullable = false)
+    private String lastIp;
+
+    /**
+     * 登陆天数
+     */
+    private int loginTimes;
+
+    @Column(columnDefinition = "text COMMENT '技能'", nullable = false)
+    private String skill;
+
+    private String pid;
+    private String gid;
+
+    @Transient
+    private PlayerSkill playerSkill;
+
+    /**
      * 显示的角色下标
      */
     private int showRoleIndex = 1;
+
+    /**
+     * 玩家战斗属性
+     */
+    @Transient
+    private Map<Integer, Map<ResourceType, Long>> role2FightAttrMap = Collections.emptyMap();
+
+    @Column(columnDefinition = "mediumtext COMMENT '玩家战斗属性'", nullable = false)
+    private String role2FightAttrMapStr;
+
+    /**
+     * 同步db开关，延迟同步
+     */
+    @Transient
+    private AtomicBoolean syndbGate = new AtomicBoolean();
 
     public PlayerEntity() {
 
@@ -133,6 +207,24 @@ public class PlayerEntity extends BaseDBEntity {
         } else {
             this.paramMap = Collections.emptyMap();
         }
+    }
+
+    public boolean alterLevel(int alter) {
+        this.level += alter;
+        immediateUpdate();
+        return true;
+    }
+
+    public void changeExp(long exp) {
+        this.exp = exp;
+    }
+
+    public void alterExp(long alter) {
+        exp += alter;
+        if (exp < 0) {
+            exp = 0;
+        }
+        update();
     }
 
     public void addRole(Role role) {
@@ -285,5 +377,148 @@ public class PlayerEntity extends BaseDBEntity {
 
     public void setRoleList(List<Role> roleList) {
         this.roleList = roleList;
+    }
+
+    public long getInsteadGold() {
+        return insteadGold;
+    }
+
+    public void setInsteadGold(long insteadGold) {
+        this.insteadGold = insteadGold;
+    }
+
+    public boolean isOnline() {
+        return online;
+    }
+
+    public void setOnline(boolean online) {
+        this.online = online;
+    }
+
+    public long getLastZeroTime() {
+        return lastZeroTime;
+    }
+
+    public void setLastZeroTime(long lastZeroTime) {
+        this.lastZeroTime = lastZeroTime;
+    }
+
+    public long getLastRechargeTime() {
+        return lastRechargeTime;
+    }
+
+    public void setLastRechargeTime(long lastRechargeTime) {
+        this.lastRechargeTime = lastRechargeTime;
+    }
+
+    public int getFirstRecharge() {
+        return firstRecharge;
+    }
+
+    public void setFirstRecharge(int firstRecharge) {
+        this.firstRecharge = firstRecharge;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getLastIp() {
+        return lastIp;
+    }
+
+    public void setLastIp(String lastIp) {
+        this.lastIp = lastIp;
+    }
+
+    public int getLoginTimes() {
+        return loginTimes;
+    }
+
+    public void setLoginTimes(int loginTimes) {
+        this.loginTimes = loginTimes;
+    }
+
+    public String getSkill() {
+        return skill;
+    }
+
+    public void setSkill(String skill) {
+        this.skill = skill;
+    }
+
+    public String getPid() {
+        return pid;
+    }
+
+    public void setPid(String pid) {
+        this.pid = pid;
+    }
+
+    public String getGid() {
+        return gid;
+    }
+
+    public void setGid(String gid) {
+        this.gid = gid;
+    }
+
+    public PlayerSkill getPlayerSkill() {
+        return playerSkill;
+    }
+
+    public void setPlayerSkill(PlayerSkill playerSkill) {
+        this.playerSkill = playerSkill;
+    }
+
+    public int getShowRoleIndex() {
+        return showRoleIndex;
+    }
+
+    public void setShowRoleIndex(int showRoleIndex) {
+        this.showRoleIndex = showRoleIndex;
+    }
+
+    public Map<Integer, Map<ResourceType, Long>> getRole2FightAttrMap() {
+        return role2FightAttrMap;
+    }
+
+    public void setRole2FightAttrMap(Map<Integer, Map<ResourceType, Long>> role2FightAttrMap) {
+        this.role2FightAttrMap = role2FightAttrMap;
+    }
+
+    public String getRole2FightAttrMapStr() {
+        return role2FightAttrMapStr;
+    }
+
+    public void setRole2FightAttrMapStr(String role2FightAttrMapStr) {
+        this.role2FightAttrMapStr = role2FightAttrMapStr;
+    }
+
+    /**
+     * 延迟同步，因为数据太大，更新太频繁，影响binlog日志，另外很多数据丢失也影响不大
+     */
+    @Override
+    public void update() {
+        if (syndbGate.compareAndSet(false, true)) {
+            PlayerActor player = Context.getBean(OnlieService.class).getOnlinePlayer(playerId);
+            if (player != null) {
+                player.schedule("延迟持久化", (h)->{
+                    syndbGate.set(false);
+                    super.update();
+                }, 10 , TimeUnit.MINUTES);
+            } else {
+                syndbGate.set(false);
+                super.update();
+            }
+        }
+    }
+
+    public void immediateUpdate() {
+        super.update();
     }
 }

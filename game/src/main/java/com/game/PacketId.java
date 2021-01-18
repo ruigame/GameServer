@@ -58,6 +58,64 @@ public class PacketId {
         public static final short RESP_LOGIN_CONFLICT = 111;
     }
 
+    /**
+     * 玩家角色
+     */
+    public static final class Role {
+        /**
+         * 主角信息
+         */
+        public static final short RESP_MAIN_ROLE = 1001;
+        /**
+         * 开启新信息
+         */
+        public static final short REQ_ROLE_CREATE = 1002;
+        /**
+         * 返回开启新角色结果
+         */
+        public static final short RESP_ROLE_CREATE = 1003;
+        /**
+         * 返回玩家经济资源信息同步
+         */
+        public static final short RESP_RESOURCE_SYNC = 1004;
+        /**
+         * 返回玩家角色等级变化同步
+         */
+        public static final short RESP_LEVEL = 1005;
+        /**
+         * 返回玩家当前经验
+         */
+        public static final short RESP_EXP = 1006;
+        /**
+         * 玩家AVATAR外观形象更新
+         */
+        public static final short RESP_ROLE_AVATAR_CHANGE = 1007;
+        /**
+         * 请求显示角色
+         */
+        public static final short REQ_SHOW_ROLE = 1008;
+        /**
+         * 返回显示角色
+         */
+        public static final short RESP_SHOW_ROLE = 1009;
+        /**
+         * 请求查看其他玩家信息
+         */
+        public static final short REQ_SHOW_OTHER_PLAYER = 1010;
+        /**
+         * 返回查看其他玩家信息
+         */
+        public static final short RESP_SHOW_OTHER_PLAYER = 1011;
+        /**
+         * 请求使用改名卡改名
+         */
+        public static final short REQ_RENAME = 1012;
+        /**
+         * 返回使用改名卡改名
+         */
+        public static final short RESP_RENAME = 1013;
+    }
+
     /***********【通用的】 **********/
     public static final class Utils {
         /**

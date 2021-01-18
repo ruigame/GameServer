@@ -6,7 +6,7 @@ import com.game.logic.commdata.PlayerCommObj;
 import com.game.logic.commdata.domain.accesser.*;
 import com.game.logic.commdata.entity.NewCommData;
 import com.game.util.ExceptionUtils;
-import com.game.util.TypeReference;
+import com.game.base.TypeReference;
 
 /**
  * @author liguorui

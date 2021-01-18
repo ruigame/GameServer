@@ -8,17 +8,18 @@ import com.game.logic.player.domain.Gender;
 import com.game.logic.player.domain.RoleType;
 import com.game.logic.player.entity.PlayerEntity;
 import com.game.logic.player.manager.PlayerEntityManager;
-import com.game.util.ConcurrentHashSet;
-import com.game.util.GameSession;
-import com.game.util.Listener;
+import com.game.util.*;
+import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Set;
+import javax.annotation.PostConstruct;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -141,4 +142,124 @@ public class PlayerService {
     }
 
     //=============初始化相关============
+
+    private void loadAccount() {
+        List<Object[]> accounts = this.playerEntityManager.getAllAccount();
+        for (Object[] each : accounts) {
+            String account = (String) each[0];
+            Integer server = (Integer) each[1];
+            Long playerId = (Long) each[2];
+            Preconditions.checkArgument(registerAccount.putIfAbsent(account + "_" + server, playerId) == null,
+                    "account:%s, server:%s", account, server);
+        }
+    }
+
+    public void updateAccount(String key, long playerId) {
+        this.registerAccount.put(key, playerId);
+    }
+
+    public boolean clearAccount2PlayerId(String key) {
+        return registerAccount.remove(key, 0);
+    }
+
+    private void loadPlayerName() {
+        Map<String, Long> allName = playerEntityManager.getAllName();
+        this.playerNameMap = new ConcurrentHashMap<>(allName);
+        this.playerNum = new AtomicInteger(playerNameMap.size());
+
+        ConcurrentHashMap<Long, String> id2name = new ConcurrentHashMap<>();
+        for (Map.Entry<String, Long> entry : allName.entrySet()) {
+            id2name.put(entry.getValue(), entry.getKey());
+        }
+        this.playerId2Name = id2name;
+    }
+
+    public int getExistPlayerCount() {
+        return playerNum.get();
+    }
+
+    public Collection<PlayerActor> getAllPlayerCache() {
+        List<PlayerActor> playerActorList = new ArrayList<>();
+        for (PlayerActor playerActor : this.id2PlayerActor.asMap().values()) {
+            if (playerActor.isInit()) {
+                playerActorList.add(playerActor);
+            }
+        }
+        return playerActorList;
+    }
+
+    public String getNameByPlayerId(long playerId) {
+        return playerId2Name.get(playerId);
+    }
+
+    public int incPlayerNum() {
+        return playerNum.incrementAndGet();
+    }
+
+    @PostConstruct
+    public void init() {
+        this.loadPlayerName();;
+        this.loadAccount();
+    }
+
+    public PlayerActor getPlayerActor(long playerId) {
+        UseTimer useTimer = new UseTimer(playerId + " getPlayerActor", 500);
+        PlayerActor player = getUnInitPlayerActor(playerId);
+        if (!player.isInit()) {
+            synchronized (player) {
+                if (!player.isInit()) {
+                    playerLoad(player);
+                }
+            }
+        }
+        useTimer.printUseTime();
+        return player;
+    }
+
+    /**
+     * 获取玩家对象（不初始化）
+     * @param playerId
+     * @return
+     */
+    public PlayerActor getUnInitPlayerActor(long playerId) {
+        PlayerActor player = id2PlayerActor.getIfPresent(playerId);
+        if (player == null) {
+            player = new PlayerActor();
+            player.setPlayerId(playerId);
+            PlayerEntity playerEntity = playerEntityManager.getPlayerEntityById(player.getId());
+            Preconditions.checkNotNull(playerEntity, "PlayerEntity NULL %s", player.getId());
+            player.setPlayerEntity(playerEntity);
+            player = cachePlayerActor(playerId, player);
+        }
+        return player;
+    }
+
+    public PlayerActor cachePlayerActor(long playerId, PlayerActor playerActor) {
+        return ConcurrentUtils.putIfAbsent(id2PlayerActor.asMap(), playerId, playerActor);
+    }
+
+    /**
+     * 玩家信息加载
+     * @param playerActor
+     */
+    public void playerLoad(PlayerActor playerActor) {
+        try {
+//            ListenerManager.getInstance().firePlayerLoadListener(playerActor);
+            playerActor.setInit(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 玩家登陆
+     * @param playerActor
+     */
+    public void playerLogin(PlayerActor playerActor) {
+//        if (!playerActor.isFightAttr()) {
+//            playerActor.calculateFightAttr(false);
+//        }
+//        loginResetScene(playerActor); //重生登陆重置玩家到主城
+
+    }
 }

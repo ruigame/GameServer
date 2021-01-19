@@ -4,12 +4,15 @@ import com.game.async.asyncdb.anotation.Persistent;
 import com.game.async.asyncdb.orm.BaseDBEntity;
 import com.game.async.asynchttp.HttpUtils;
 import com.game.async.asynchttp.example.Player;
+import com.game.base.OnlineService;
 import com.game.base.PlayerActor;
 import com.game.logic.player.dao.PlayerEntityDao;
 import com.game.logic.player.domain.PlayerSkill;
 import com.game.logic.player.domain.ResourceType;
 import com.game.logic.player.domain.Role;
+import com.game.logic.player.domain.RoleType;
 import com.game.util.Context;
+import com.game.util.TimeUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
@@ -100,6 +103,11 @@ public class PlayerEntity extends BaseDBEntity {
      * 最近登陆时间
      */
     private long loginTime;
+
+    /**
+     * 下线时间
+     */
+    private long logoutTime;
 
     /**
      * 角色信息
@@ -399,6 +407,38 @@ public class PlayerEntity extends BaseDBEntity {
         return lastZeroTime;
     }
 
+    public void updateLastZeroTime() {
+        this.lastZeroTime = TimeUtils.currentTimeMillis();
+        update();
+    }
+
+    public void login(String ip) {
+        setLastIp(ip);
+        updateLoginTime();
+        update();
+    }
+
+    public void updateLoginTime() {
+        long curTime = TimeUtils.currentTimeMillis();
+        online = true;
+        if (loginTime == 0) {
+            loginTime = curTime;
+            loginTimes = 1;
+            return;
+        }
+
+        if (!TimeUtils.isSameDay(loginTime)) {
+            loginTimes ++;
+        }
+        loginTime = curTime;
+    }
+
+    public void logout() {
+        this.logoutTime = TimeUtils.currentTimeMillis();
+        this.online = false;
+        immediateUpdate();
+    }
+
     public void setLastZeroTime(long lastZeroTime) {
         this.lastZeroTime = lastZeroTime;
     }
@@ -499,13 +539,38 @@ public class PlayerEntity extends BaseDBEntity {
         this.role2FightAttrMapStr = role2FightAttrMapStr;
     }
 
+    public Role getRoleByIndex(int index) {
+        return roleList.get(index - 1);
+    }
+
+    public long getLogoutTime() {
+        return logoutTime;
+    }
+
+    public void setLogoutTime(long logoutTime) {
+        this.logoutTime = logoutTime;
+    }
+
+    public boolean isRoleTypeExist(RoleType roleType) {
+        for (Role role : roleList) {
+            if (role.getRoleType() == roleType) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void changeName(String name) {
+        this.name = name;
+    }
+
     /**
      * 延迟同步，因为数据太大，更新太频繁，影响binlog日志，另外很多数据丢失也影响不大
      */
     @Override
     public void update() {
         if (syndbGate.compareAndSet(false, true)) {
-            PlayerActor player = Context.getBean(OnlieService.class).getOnlinePlayer(playerId);
+            PlayerActor player = Context.getBean(OnlineService.class).getOnlinePlayer(playerId);
             if (player != null) {
                 player.schedule("延迟持久化", (h)->{
                     syndbGate.set(false);

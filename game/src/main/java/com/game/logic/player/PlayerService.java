@@ -1,13 +1,16 @@
 package com.game.logic.player;
 
+import com.game.PacketId;
 import com.game.base.PlayerActor;
 import com.game.base.UUIDService;
 import com.game.file.ConfigPath;
 import com.game.file.prop.PropConfigStore;
-import com.game.logic.player.domain.Gender;
-import com.game.logic.player.domain.RoleType;
+import com.game.logic.player.domain.*;
 import com.game.logic.player.entity.PlayerEntity;
 import com.game.logic.player.manager.PlayerEntityManager;
+import com.game.logic.player.packet.resp.RespMainRolePacket;
+import com.game.logic.player.packet.resp.RespRoleCreatePacket;
+import com.game.net.packet.PacketFactory;
 import com.game.util.*;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
@@ -256,10 +259,183 @@ public class PlayerService {
      * @param playerActor
      */
     public void playerLogin(PlayerActor playerActor) {
-//        if (!playerActor.isFightAttr()) {
-//            playerActor.calculateFightAttr(false);
-//        }
-//        loginResetScene(playerActor); //重生登陆重置玩家到主城
+        if (!playerActor.isInitFightAttr()) {
+            playerActor.calculateFightAttr(false);
+        }
+        loginResetScene(playerActor); //重生登陆重置玩家到主城
+        PlayerInfoVo playerInfoVo = generatePlayerInfo(playerActor);
+        RespMainRolePacket packet = PacketFactory.createPacket(PacketId.Role.RESP_MAIN_ROLE);
+        packet.initBaseInfo(playerInfoVo);
+        playerActor.sendPacket(packet);
+        loginPlayers.add(playerActor.getId());
 
+        playerActor.login();
+//        ListenerManager.getInstance().firePlayerLoginListener(playerActor);
+        playerActor.calculateFightAttr(); //不应该在这里调用，但就系统都在登陆监听了调用，去掉，统一放在这里简单点省去每个地方listener都调用
+    }
+
+    /**
+     * 登陆检查重置玩家所在的场景
+     * @param playerActor
+     */
+    private void loginResetScene(PlayerActor playerActor) {
+        playerActor.getPlayerEntity().setSceneId(getSceneId(playerActor));
+    }
+
+    private int getSceneId(PlayerActor playerActor) {
+        return -1;
+    }
+
+    public PlayerInfoVo generatePlayerInfo(PlayerActor player) {
+        PlayerInfoVo playerInfoVo = new PlayerInfoVo();
+        playerInfoVo.setPlayerId(player.getId());
+        playerInfoVo.setName(player.getName());
+        playerInfoVo.setGuildId(player.getGuildId());
+        playerInfoVo.setGuildName(player.getGuildName());
+        playerInfoVo.setSceneId(player.getPlayerEntity().getSceneId());
+        List<Role> roleList = player.getRoleList();
+        List<RoleInfoVo> roleInfos = new ArrayList<>();
+        for (Role each : roleList) {
+            RoleInfoVo roleInfoVo = generateRoleInfo(player, each);
+            roleInfos.add(roleInfoVo);
+        }
+        playerInfoVo.setRoleInfos(roleInfos);
+        playerInfoVo.setResMap(player.getAllRes());
+        playerInfoVo.setConnectKey(player.getSession().getConnectKey());
+        return playerInfoVo;
+    }
+
+    public RoleInfoVo generateRoleInfo(PlayerActor player, Role role) {
+        return generateRoleInfo(player, role, true);
+    }
+
+    public RoleInfoVo generateRoleInfo(PlayerActor player, Role role, boolean containFight) {
+        RoleInfoVo roleInfoVo = new RoleInfoVo();
+        int index = role.getIndex();
+        roleInfoVo.setIndex(index);
+        roleInfoVo.setRoleType(role.getRoleType());
+        roleInfoVo.setGender(role.getGender());
+        roleInfoVo.setAvatar(role.getAvatar());
+        roleInfoVo.setWeapon(role.getWeapon());
+        Map<ResourceType, Long> attrs = player.getFightAttrMap(index);
+        roleInfoVo.setAttrs(attrs);
+        roleInfoVo.setFighting(containFight ? player.getRoleFighting(role.getIndex()) : 0);
+        return roleInfoVo;
+    }
+
+    /**
+     * 创建新角色
+     * @param playerActor
+     * @param roleType
+     * @param gender
+     * @return
+     */
+    public boolean createNewRole(PlayerActor playerActor, RoleType roleType, Gender gender) {
+        PlayerEntity playerEntity = playerActor.getPlayerEntity();
+        List<Role> roles = playerEntity.getRoleList();
+        if (roles.size() >= 3) {
+            return false;
+        }
+        if (playerEntity.isRoleTypeExist(roleType)) {
+            return false;
+        }
+        int index = roles.size() - 1;
+        Role newRole = new Role(index, roleType, gender);
+        playerEntity.addRole(newRole);
+        playerEntity.immediateUpdate();
+
+        RespRoleCreatePacket packet = PacketFactory.createPacket(PacketId.Role.RESP_ROLE_CREATE);
+        RoleInfoVo roleInfoVo = generateRoleInfo(playerActor, newRole);
+        packet.init(roleInfoVo);
+        playerActor.sendPacket(packet);
+
+//        ListenerManager.getInstance().fireRoleCreateListener(playerActor, newRole);
+        playerActor.calculateFightAttr();
+        return true;
+    }
+
+    public PlayerActor getPlayerActorByName(String name) {
+        Long playerId = playerNameMap.get(name);
+        if (playerId == null) {
+            return null;
+        }
+        return getPlayerActor(playerId);
+    }
+
+    public Long registerTemporaryAccount(String account2server) {
+        return registerAccount.putIfAbsent(account2server, 0L);
+    }
+
+    public Long getPlayerIdByASKey(String account2server) {
+        return registerAccount.get(account2server);
+    }
+
+    public PlayerActor getPlayerByASKey(String account2server) {
+        Long playerId = getPlayerIdByASKey(account2server);
+        if (playerId != null) {
+            return getPlayerActor(playerId);
+        }
+        return null;
+    }
+
+    public void checkThreadSafe(long playerId) {
+        if (!checkThreadSafe) {
+            return;
+        }
+        PlayerActor playerActor = getPlayerActor(playerId);
+        if (!playerActor.isInThread()) {
+            ExceptionUtils.log("checkThreadSafe no inThread");
+        }
+    }
+
+    public void checkPlayer() {
+        Map<String, PlayerEntity> name2player = new HashMap<>();
+        List<PlayerEntity> p1 = this.playerEntityManager.getDuplicateName();
+        for (PlayerEntity p : p1) {
+            PlayerEntity old = name2player.get(p.getName());
+            if (old != null) {
+                PlayerEntity temp = null;
+                PlayerEntity std = null;
+                PlayerNameCompare curP = new PlayerNameCompare(p);
+                PlayerNameCompare oldP = new PlayerNameCompare(old);
+                if (curP.isNameMore(oldP)) {
+                    temp = old;
+                    std = p;
+                } else {
+                    temp = p;
+                    std = old;
+                }
+                if (!processPlayerRename(temp)) {
+                    throw new RuntimeException("can not rename" + temp);
+                }
+                name2player.put(std.getName(), std);
+            } else {
+                name2player.put(p.getName(), p);
+            }
+        }
+        loadPlayerName();
+    }
+
+    private boolean processPlayerRename(PlayerEntity p) {
+        String oldName = p.getName();
+        int retryTimes = 100;
+        int index = 0;
+        for (int i = 0; i < retryTimes; i++) {
+            String newName = oldName + "-[" + p.getServerId() + "]";
+            if (index > 0) {
+                newName = newName + "." + index;
+            }
+            if (registerTemporaryNickName(newName)) {
+                updateTemporaryNickName(newName, p.getPlayerId());
+                p.changeName(newName);
+                LOGGER.info("ChangePlayerName:{} {}", p.getPlayerId(), newName);
+                Context.getBean(PlayerEntityManager.class).update(p);
+//                ListenerManager.getInstance().firePlayerRename(p);
+                //发邮件
+                return true;
+            }
+            index ++;
+        }
+        return false;
     }
 }

@@ -122,6 +122,10 @@ public class GuildManager implements Synchronizer<Guild>, ServerStarter {
         return null;
     }
 
+    public Guild getGuild(long guildId) {
+        return guildMap.get(guildId);
+    }
+
     @Override
     public boolean insert(Guild object) {
         return false;

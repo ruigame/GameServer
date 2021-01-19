@@ -1,9 +1,27 @@
 package com.game.base;
 
-import com.game.net.packet.AbstractPacket;
+import com.game.logic.guild.entity.Guild;
+import com.game.logic.guild.manager.GuildManager;
+import com.game.logic.player.domain.PlayerResourceType;
+import com.game.logic.player.domain.PlayerStatus;
+import com.game.logic.player.domain.ResourceType;
+import com.game.logic.player.domain.Role;
 import com.game.logic.player.entity.PlayerEntity;
+import com.game.net.packet.AbstractPacket;
+import com.game.thread.message.IMessage;
 import com.game.thread.message.MessageHandler;
+import com.game.util.Context;
+import com.game.util.ExceptionUtils;
+import com.game.util.GameSession;
+import com.game.util.TimeUtils;
+import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -12,7 +30,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class PlayerActor extends MessageHandler<PlayerActor> implements IPlayer<PlayerActor> {
 
+    private Logger logger = LoggerFactory.getLogger(PlayerActor.class);
+
     private PlayerEntity playerEntity;
+
+    private GameSession session;
 
     private long playerId;
 
@@ -26,10 +48,17 @@ public class PlayerActor extends MessageHandler<PlayerActor> implements IPlayer<
      */
     private volatile  boolean discardReqPacet;
 
+    private AtomicBoolean calFightAttrGate = new AtomicBoolean();
+
     /**
      * 初始化加载模块数据
      */
     private volatile boolean init;
+
+    /**
+     * 玩家状态
+     */
+    private PlayerStatus status;
 
     public PlayerActor(PlayerEntity playerEntity) {
         this.playerEntity = playerEntity;
@@ -82,8 +111,157 @@ public class PlayerActor extends MessageHandler<PlayerActor> implements IPlayer<
         this.init = init;
     }
 
+    public boolean isInitFightAttr() {
+        return !getRole2FightAttrMap().isEmpty() && getRole2FightAttrMap().size() == getRoleSize();
+    }
+
+    public Map<Integer, Map<ResourceType, Long>> getRole2FightAttrMap() {
+        return this.playerEntity.getRole2FightAttrMap();
+    }
+
+    public int getRoleSize() {
+        return getRoleList().size();
+    }
+
+    public List<Role> getRoleList() {
+        return playerEntity.getRoleList();
+    }
+
+    public void calculateFightAttr() {
+        if (calFightAttrGate.compareAndSet(false, true)) {
+            schedule("计算战力", new IMessage<PlayerActor>() {
+                @Override
+                public void execute(PlayerActor p) {
+                    calFightAttrGate.set(false);
+                    calculateFightAttr(true);
+                }
+            }, 500, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    public void calculateFightAttr(boolean send) {
+        if (!isInThread()) {
+            ExceptionUtils.log("计算战力不在玩家线程");
+            addMessage(new IMessage<PlayerActor>() {
+                @Override
+                public void execute(PlayerActor p) {
+                    clearAttrAndFightingCache();
+//                    Context.getRoleFightAttrService().processFightAttr(this, send);
+                }
+            });
+            return;
+        }
+        clearAttrAndFightingCache();
+//                    Context.getRoleFightAttrService().processFightAttr(this, send);
+    }
+
+    public void clearAttrAndFightingCache() {
+//        attrCache.clear();
+//        fightingCache.clear();
+//        sysFacAttrCache.clear();
+    }
+
+    public void login() {
+        isLogin.compareAndSet(false, true);
+        if (getLastZeroTime() == 0) {
+            updateLastZeroTime();
+        }
+        playerEntity.login(getIp());
+//        Context.getBean(MidNightService.class).playerOnZero(this);
+        discardReqPacet = false;
+    }
+
+    public void logout() {
+        if (isLogin.compareAndSet(true, false)) {
+            logger.debug("logout {}", getAccount());
+            playerEntity.logout();
+            changeStatus(null);
+            cancleAllSchedule();
+            calFightAttrGate.set(false);
+//            if (fireFightingChange) {//调度还没执行
+//                imFireChangeFight();
+//            }
+        }
+    }
+
+    /**
+     * 上次零点到当前时间过去的天数
+     * @return
+     */
+    public int passZeroTime() {
+        long lastZeroTime = getLastZeroTime();
+        return TimeUtils.getNDayFromTimes(lastZeroTime);
+    }
+
+    public void changeStatus(PlayerStatus newStatus) {
+        if (status == newStatus) {
+            return;
+        }
+        logger.info("{} change status from {} to {}", getAccount(), status, newStatus);
+        if (status != null) {
+            status.out(this);
+        }
+        status = newStatus;
+        if (status != null) {
+            status.in(this);
+        }
+    }
+
+    public boolean isLoging() {
+        return isLogin.get();
+    }
+
+    public long getLastZeroTime() {
+        return this.playerEntity.getLastZeroTime();
+    }
+
+    public void updateLastZeroTime() {
+        this.playerEntity.updateLastZeroTime();
+    }
+
+    public String getIp() {
+        return session.getIp();
+    }
+
     public int getLevel() {
         return playerEntity.getLevel();
+    }
+
+    public long getGuildId() {
+        return playerEntity.getGuildId();
+    }
+
+    public Guild getGuild() {
+        long guildId = this.getGuildId();
+        if (guildId > 0) {
+            return Context.getBean(GuildManager.class).getGuild(guildId);
+        }
+        return null;
+    }
+
+    public Map<ResourceType, Long> getFightAttrMap(int roleIndex) {
+        return getRole2FightAttrMap().getOrDefault(roleIndex, Collections.emptyMap());
+    }
+
+    public long getRoleFighting(int roleIndex) {
+        return getRoleByIndex(roleIndex).getFighting();
+    }
+
+    public Role getRoleByIndex(int roleIndex) {
+        return playerEntity.getRoleByIndex(roleIndex);
+    }
+
+    public Map<PlayerResourceType, Long> getAllRes() {
+        Map<PlayerResourceType, Long> map = Maps.newHashMap();
+        for (PlayerResourceType each : PlayerResourceType.values()) {
+            map.put(each, each.getValue(this));
+        }
+        return map;
+    }
+
+    public String getGuildName() {
+        Guild guild = getGuild();
+        return guild != null ? guild.getName() : null;
     }
 
     public void setPlayerId(long playerId) {
@@ -100,5 +278,21 @@ public class PlayerActor extends MessageHandler<PlayerActor> implements IPlayer<
 
     public void setPlayerEntity(PlayerEntity playerEntity) {
         this.playerEntity = playerEntity;
+    }
+
+    public GameSession getSession() {
+        return session;
+    }
+
+    public void setSession(GameSession session) {
+        this.session = session;
+    }
+
+    public PlayerStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PlayerStatus status) {
+        this.status = status;
     }
 }

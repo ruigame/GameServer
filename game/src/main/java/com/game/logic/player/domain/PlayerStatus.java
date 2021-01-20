@@ -1,6 +1,6 @@
 package com.game.logic.player.domain;
 
-import com.game.base.PlayerActor;
+import com.game.logic.common.PlayerActor;
 
 /**
  * @Author: liguorui

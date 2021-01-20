@@ -1,6 +1,6 @@
 package com.game.logic.sys;
 
-import com.game.base.PlayerActor;
+import com.game.logic.common.PlayerActor;
 import com.game.util.GameSession;
 import com.game.util.Listener;
 

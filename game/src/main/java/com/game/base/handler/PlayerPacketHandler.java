@@ -1,6 +1,5 @@
 package com.game.base.handler;
 
-import com.game.base.PlayerActor;
 import com.game.net.packet.AbstractPacket;
 import com.game.net.packet.IPacketHandler;
 import com.game.net.packet.PacketHandlerWrapper;

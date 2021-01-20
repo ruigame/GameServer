@@ -3,22 +3,20 @@ package com.game.logic.player.entity;
 import com.game.async.asyncdb.anotation.Persistent;
 import com.game.async.asyncdb.orm.BaseDBEntity;
 import com.game.async.asynchttp.HttpUtils;
-import com.game.async.asynchttp.example.Player;
-import com.game.base.OnlineService;
-import com.game.base.PlayerActor;
+import com.game.base.TypeReference;
+import com.game.logic.common.OnlineService;
+import com.game.logic.common.PlayerActor;
 import com.game.logic.player.dao.PlayerEntityDao;
-import com.game.logic.player.domain.PlayerSkill;
-import com.game.logic.player.domain.ResourceType;
-import com.game.logic.player.domain.Role;
-import com.game.logic.player.domain.RoleType;
+import com.game.logic.player.domain.*;
 import com.game.util.Context;
+import com.game.base.JSONUtils;
+import com.game.util.ExceptionUtils;
 import com.game.util.TimeUtils;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -41,7 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
         @NamedQuery(name = "countTotalPay", query = "SELECT sum(totalPay) FROM PlayerEntity "),
         @NamedQuery(name = "getMaxLevel", query = "SELECT max(level) FROM PlayerEntity "),
 })
-public class PlayerEntity extends BaseDBEntity {
+public class PlayerEntity extends BaseDBEntity implements IPlayerId {
 
     @Id
     private long playerId; //id
@@ -190,6 +188,14 @@ public class PlayerEntity extends BaseDBEntity {
     @Transient
     private AtomicBoolean syndbGate = new AtomicBoolean();
 
+    @Column(columnDefinition = "text COMMENT '黑名单'")
+    private String blackList;
+    /**
+     * 玩家拉黑的人
+     */
+    @Transient
+    private Set<Long> playerIdBlackList = new HashSet<>();
+
     public PlayerEntity() {
 
     }
@@ -243,6 +249,7 @@ public class PlayerEntity extends BaseDBEntity {
         this.showRoleIndex = roleIndex;
     }
 
+    @Override
     public long getPlayerId() {
         return playerId;
     }
@@ -281,6 +288,7 @@ public class PlayerEntity extends BaseDBEntity {
 
     public void setParams(String params) {
         this.params = params;
+        this.initParams();
     }
 
     public Map<String, String> getParamMap() {
@@ -507,6 +515,30 @@ public class PlayerEntity extends BaseDBEntity {
         this.gid = gid;
     }
 
+    public boolean isInBlockList(long playerId) {
+        return playerIdBlackList.contains(playerId);
+    }
+
+    public void black(Long playerId) {
+        playerIdBlackList.add(playerId);
+        if (playerIdBlackList.size() > 50) {
+            Iterator<Long> iterator = playerIdBlackList.iterator();
+            while(iterator.hasNext()) {
+                Long blackPlayerId = iterator.next();
+                if (!blackPlayerId.equals(playerId)) {
+                    iterator.remove();
+                    break;
+                }
+            }
+        }
+        update();
+    }
+
+    public void unBlack(Long playerId) {
+        playerIdBlackList.remove(playerId);
+        update();
+    }
+
     public PlayerSkill getPlayerSkill() {
         return playerSkill;
     }
@@ -562,6 +594,69 @@ public class PlayerEntity extends BaseDBEntity {
 
     public void changeName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public void serialize() {
+        roles = JSONUtils.toJsonStr(roleList);
+        skill = JSONUtils.toJsonStr(playerSkill.getAllSkillMap());
+        blackList = JSONUtils.toJsonStr(playerIdBlackList);
+
+        this.role2FightAttrMapStr = JSONUtils.toJsonStr(role2FightAttrMap);
+    }
+
+    @Override
+    public void deserialize() {
+        initParams();
+        initRole();
+        initSkill();
+        initblackList();
+        if (StringUtils.isBlank(role2FightAttrMapStr)) {
+            this.role2FightAttrMap = Collections.emptyMap();
+        } else {
+            this.role2FightAttrMap = Collections.unmodifiableMap(fildNullValue(role2FightAttrMapStr));
+        }
+    }
+
+    private Map<Integer, Map<ResourceType, Long>> fildNullValue(String attrStr) {
+        Map<Integer, Map<ResourceType, Long>> attr = JSONUtils.toObject(attrStr, TypeReference.integer2attr);
+        Map<Integer, Map<ResourceType, Long>> newAttr = new HashMap<>();
+        for (Map.Entry<Integer, Map<ResourceType, Long>> entry : attr.entrySet()) {
+            if (entry.getValue() == null) {
+                ExceptionUtils.log("account: {} 有空战力属性:{},具体属性：{}", getAccount(), attrStr, entry.getKey());
+                continue;
+            }
+            newAttr.put(entry.getKey(), entry.getValue());
+        }
+        return newAttr;
+    }
+
+    private void initRole() {
+        if (StringUtils.isNotBlank(roles)) {
+            List<Role> roleList = JSONUtils.toObject(roles, TypeReference.LIST_ROLE);
+            roleList = Lists.newArrayList(roleList); //重新排序，保证按索引顺序排序
+            roleList.sort(Comparator.comparingInt(Role::getIndex));
+            this.roleList = roleList;
+        } else {
+            roleList = Lists.newArrayList();
+        }
+    }
+
+    private void initblackList() {
+        playerIdBlackList = new HashSet<>();
+        if (StringUtils.isNotBlank(blackList)) {
+            playerIdBlackList = JSONUtils.toObject(blackList, TypeReference.SET_LONG);
+        }
+    }
+
+    private void initSkill() {
+        playerSkill = new PlayerSkill(skill);
+    }
+
+    @Override
+    public String toString() {
+        return "PlayerEntity [playerId=" + playerId + ", account=" + account
+                + ",name=" + name + ", level=" + level + "]";
     }
 
     /**

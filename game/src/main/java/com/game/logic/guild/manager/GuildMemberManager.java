@@ -1,7 +1,7 @@
 package com.game.logic.guild.manager;
 
 import com.game.async.asyncdb.Synchronizer;
-import com.game.base.PlayerActor;
+import com.game.logic.common.PlayerActor;
 import com.game.logic.guild.dao.GuildMemberDAO;
 import com.game.logic.guild.entity.GuildMember;
 import com.game.util.TimeUtils;

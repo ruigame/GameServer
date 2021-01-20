@@ -11,6 +11,14 @@ public enum CloseCause {
      */
     MAINTAIN,
     /**
+     * 重登陆
+     */
+    Duplicate_login,
+    /**
+     * 封号
+     */
+    FORBID_ROLE,
+    /**
      * 空闲超时
      */
     IDLE_TIMEOUT,
@@ -35,4 +43,21 @@ public enum CloseCause {
      */
     ADMIN_KEY_INVALID,
     ;
+
+    /**
+     * 是否可以重新登陆
+     */
+    private final boolean relogin;
+
+    private CloseCause() {
+        this(false);
+    }
+
+    private CloseCause(boolean relogin) {
+        this.relogin = relogin;
+    }
+
+    public boolean isRelogin() {
+        return relogin;
+    }
 }

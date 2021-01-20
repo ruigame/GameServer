@@ -1,9 +1,9 @@
 package com.game.logic.guild.manager;
 
 import com.game.async.asyncdb.Synchronizer;
-import com.game.base.ConfigService;
-import com.game.base.PlayerActor;
-import com.game.base.UUIDService;
+import com.game.logic.common.ConfigService;
+import com.game.logic.common.PlayerActor;
+import com.game.logic.common.UUIDService;
 import com.game.logic.guild.GuildPooledBusinessService;
 import com.game.logic.guild.dao.GuildDAO;
 import com.game.logic.guild.dao.GuildMemberDAO;

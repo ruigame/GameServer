@@ -4,7 +4,7 @@ import com.game.async.asyncdb.anotation.Persistent;
 import com.game.async.asyncdb.orm.BaseDBEntity;
 import com.game.logic.server.dao.ServerInfoDao;
 import com.game.logic.server.domain.ConfigKey;
-import com.game.util.JSONUtils;
+import com.game.base.JSONUtils;
 import org.apache.commons.lang.StringUtils;
 
 import javax.persistence.*;

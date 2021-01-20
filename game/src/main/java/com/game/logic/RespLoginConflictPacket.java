@@ -58,6 +58,14 @@ public class RespLoginConflictPacket extends ResponsePacket {
         this.type = DUPLICATE_LOGIN;
     }
 
+    public void maintain() {
+        this.type = MAINTAIN;
+    }
+
+    public void forbid() {
+        this.type = FORBID;
+    }
+
     public void idle() {
         this.type = IDLE;
     }

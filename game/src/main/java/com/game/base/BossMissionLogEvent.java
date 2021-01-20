@@ -1,11 +1,13 @@
 package com.game.base;
 
+import com.game.logic.common.PlayerLogEvent;
+
 /**
  * boss副本日志
  * @Author: liguorui
  * @Date: 2020/12/2 下午9:55
  */
-public class BossMissionLogEvent extends PlayerLogEvent{
+public class BossMissionLogEvent extends PlayerLogEvent {
 
     private int type;
 

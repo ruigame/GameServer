@@ -1,14 +1,19 @@
 package com.game.base;
 
+import com.game.logic.common.ConfigService;
+import com.game.logic.common.OnlineService;
+import com.game.logic.player.domain.ResourceType;
 import com.game.net.CloseCause;
-import com.game.util.GameSession;
 import com.game.net.NullChannel;
 import com.game.net.packet.AbstractPacket;
 import com.game.net.packet.Response;
+import com.game.util.Context;
+import com.game.util.GameSession;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -34,13 +39,11 @@ public class GameSessionHelper {
         Channel channel = session.getChannel();
         AtomicBoolean reflushChannelSchedule = session.getReflushChannelSchedule();
         if (!session.isActive()) {
-//            Context.getBean(OnlineService.class).sessionClose(session);
+            Context.getBean(OnlineService.class).sessionClose(session);
             return false;
         }
         if (response != null && !(channel instanceof NullChannel)) {
-//            if (Context.getBean(ConfigService.class).isFlushStatus()) { //是否立即刷新
-//            }
-            if (true) {
+            if (Context.getBean(ConfigService.class).isFlushStatus()) { //是否立即刷新
                 channel.writeAndFlush(response);
             } else {
                 ChannelFuture writeFuture = channel.write(response);
@@ -67,7 +70,7 @@ public class GameSessionHelper {
     }
 
     /**
-     * 吧Response数据立即写，完成后关闭channel，如果写超时就关闭（100毫秒超时）
+     * 把Response数据立即写，完成后关闭channel，如果写超时就关闭（100毫秒超时）
      * @param session
      * @param response
      * @param cause
@@ -92,5 +95,14 @@ public class GameSessionHelper {
                 }
             }, 100, TimeUnit.MILLISECONDS);
         }
+    }
+
+    public static Response writeAttr(Response response, Map<ResourceType, Long> attrs) {
+        response.writeShort(attrs.size());
+        for (Map.Entry<ResourceType, Long> entry : attrs.entrySet()) {
+            response.writeShort(entry.getKey().getCode());
+            response.writeLong(entry.getValue());
+        }
+        return response;
     }
 }

@@ -16,17 +16,17 @@ public class PacketId {
          */
         public static final short RESP_LOGIN_AUTH = 2;
         /**
-         * 请求随机名
+         * 请求随机名(分性别)
          */
         public static final short REQ_NAME_RANDOM = 3;
         /**
-         * 返回随机名
+         * 返回随机名（分性别）
          */
         public static final short RESP_NAME_RANDOM = 4;
         /**
          * 请求创建角色
          */
-        public static final short REQ_CREATE_PLAYER = 5;
+        public static final short REQ_PLAYER_CREATE = 5;
         /**
          * 返回创建角色结果
          */
@@ -56,6 +56,15 @@ public class PacketId {
          * 登陆重登陆
          */
         public static final short RESP_LOGIN_CONFLICT = 111;
+
+        /**
+         * 请求随机名(不分性别，仅供展示)
+         */
+        public static final short REQ_NAME_RANDOM_SHOW = 112;
+        /**
+         * 返回随机名（不分性别，仅供展示）
+         */
+        public static final short RESP_NAME_RANDOM_SHOW = 113;
     }
 
     /**
@@ -121,11 +130,11 @@ public class PacketId {
         /**
          * 返回各种文字消息
          */
-        public static final short RESP_MESSAGE = 2;
+        public static final short RESP_MESSAGE = 9000;
         /**
          * 账号重登陆
          */
-        public static final short RESP_LOGIN_CONFLICT = 2;
+        public static final short RESP_LOGIN_CONFLICT = 9001;
     }
 
 

@@ -77,6 +77,10 @@ public class AsynDBEntity {
 
     }
 
+    public void deserialize() {
+
+    }
+
     public int getHash() {
         return hashCode();
     }

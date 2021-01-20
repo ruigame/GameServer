@@ -15,29 +15,30 @@ import java.lang.reflect.Field;
 public class BaseDBEntity extends AsynDBEntity {
 
     public void insert() {
-//        if (isRobot()) {
-//            return;
-//        }
+        if (isRobot()) {
+            return;
+        }
         Context.getBean(AsyncDBService.class).insert(this);
     }
 
     public void update() {
- //if (isRobot()) {
-//            return;
-//        }
+        if (isRobot()) {
+            return;
+        }
         Context.getBean(AsyncDBService.class).update(this);
     }
 
     public void delete() {
-        //if (isRobot()) {
-//            return;
-//        }
+        if (isRobot()) {
+            return;
+        }
         Context.getBean(AsyncDBService.class).delete(this);
     }
 
     public void serialize() {
 
     }
+
 
     public void deserialize() {
 

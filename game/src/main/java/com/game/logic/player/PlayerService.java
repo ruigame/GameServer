@@ -1,8 +1,8 @@
 package com.game.logic.player;
 
 import com.game.PacketId;
-import com.game.base.PlayerActor;
-import com.game.base.UUIDService;
+import com.game.logic.common.PlayerActor;
+import com.game.logic.common.UUIDService;
 import com.game.file.ConfigPath;
 import com.game.file.prop.PropConfigStore;
 import com.game.logic.player.domain.*;
@@ -179,6 +179,10 @@ public class PlayerService {
 
     public int getExistPlayerCount() {
         return playerNum.get();
+    }
+
+    public PlayerActor getPlayerActorByPlayerId(long playerId) {
+        return id2PlayerActor.getIfPresent(playerId);
     }
 
     public Collection<PlayerActor> getAllPlayerCache() {

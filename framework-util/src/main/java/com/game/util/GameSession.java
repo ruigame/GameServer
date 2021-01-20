@@ -101,6 +101,10 @@ public class GameSession {
         }
     }
 
+    public boolean isRegister() {
+        return status.ordinal() >= GameSessionStatus.REGISTER.ordinal();
+    }
+
     public boolean isAuthed() {
         return status.ordinal() >= GameSessionStatus.AUTHED.ordinal();
     }

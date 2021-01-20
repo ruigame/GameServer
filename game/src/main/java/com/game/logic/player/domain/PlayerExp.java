@@ -1,10 +1,8 @@
 package com.game.logic.player.domain;
 
-import com.game.base.PlayerActor;
+import com.game.logic.common.PlayerActor;
 import com.game.logic.player.entity.PlayerEntity;
 import com.google.common.base.Preconditions;
-
-import java.sql.Struct;
 
 /**
  * 玩家经验类

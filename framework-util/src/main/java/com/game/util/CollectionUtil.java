@@ -1,7 +1,9 @@
 package com.game.util;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,6 +19,10 @@ public class CollectionUtil {
 
     public static boolean isEmpty(Map<?, ?> map) {
         return MapUtils.isEmpty(map);
+    }
+
+    public static boolean isEmpty(Collection<? extends Object> c) {
+        return CollectionUtils.isEmpty(c);
     }
 
     public static void addIntegerMap(Map<Integer, Integer> totalMap, int key, int value) {

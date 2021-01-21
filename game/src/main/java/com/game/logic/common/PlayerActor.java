@@ -1,6 +1,7 @@
 package com.game.logic.common;
 
 import com.game.base.IPlayer;
+import com.game.base.handler.PacketMessage;
 import com.game.logic.guild.entity.Guild;
 import com.game.logic.guild.manager.GuildManager;
 import com.game.logic.player.domain.PlayerResourceType;
@@ -8,6 +9,7 @@ import com.game.logic.player.domain.PlayerStatus;
 import com.game.logic.player.domain.ResourceType;
 import com.game.logic.player.domain.Role;
 import com.game.logic.player.entity.PlayerEntity;
+import com.game.net.LoginAuthParam;
 import com.game.net.packet.AbstractPacket;
 import com.game.thread.message.IMessage;
 import com.game.thread.message.MessageHandler;
@@ -19,11 +21,10 @@ import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @Author: liguorui
@@ -72,18 +73,48 @@ public class PlayerActor extends MessageHandler<PlayerActor> implements IPlayer<
         return playerEntity.getAccount();
     }
 
+    public String getServer() {
+        return String.valueOf(playerEntity.getServerId());
+    }
+
     public boolean isLogined() {
         return isLogin.get();
     }
 
     @Override
     public String getName() {
+        return playerEntity.getName();
+    }
+
+    public String getGid() {
+        GameSession session = getSession();
+        if (session != null) {
+            LoginAuthParam loginAuthParam = session.getLoginAuthParam();
+            if (loginAuthParam != null) {
+                return loginAuthParam.getGid();
+            }
+        }
+        return null;
+    }
+
+    public String getParam() {
+        return session != null ? session.getParam() : "";
+    }
+
+    public String getPid() {
+        GameSession session = getSession();
+        if (session != null) {
+            LoginAuthParam loginAuthParam = session.getLoginAuthParam();
+            if (loginAuthParam != null) {
+                return loginAuthParam.getPid();
+            }
+        }
         return null;
     }
 
     @Override
     public long getPlayerId() {
-        return 0;
+        return playerId;
     }
 
     @Override
@@ -300,4 +331,33 @@ public class PlayerActor extends MessageHandler<PlayerActor> implements IPlayer<
     public void setStatus(PlayerStatus status) {
         this.status = status;
     }
+
+    /**
+     * 打印前几个协议情况
+     * @return
+     */
+    public String printTopPacket() {
+        Map<Short, AtomicInteger> packet2Nummap = new HashMap<>(getMessageSize());
+        for (IMessage<PlayerActor> message : getMessages()) {
+            if (!(message instanceof PacketMessage)) {
+                continue;
+            }
+            PacketMessage packetMessage = (PacketMessage)message;
+            packet2Nummap.computeIfAbsent(packetMessage.getPacket().getCmd(), c -> new AtomicInteger()).incrementAndGet();
+        }
+
+        List<Map.Entry<Short, AtomicInteger>> messageNumList = new ArrayList<>();
+        messageNumList.addAll(packet2Nummap.entrySet());
+        messageNumList.sort((m1, m2) -> Integer.compare(m2.getValue().get(), m2.getValue().get()));
+        StringBuilder builder = new StringBuilder(128);
+        for (int i= 0,length = messageNumList.size(); i < 5 && i < length; i++) {
+            Map.Entry<Short, AtomicInteger> entry = messageNumList.get(i);
+            if (i > 0) {
+                builder.append(',');
+            }
+            builder.append(entry.getKey()).append('=').append(entry.getValue());
+        }
+        return builder.toString();
+    }
+
 }

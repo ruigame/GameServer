@@ -12,6 +12,8 @@ public class TimeUtils {
 
     public static final long TimeMillisOneDay = 24 * 60 * 60 * 1000;
 
+    public static final int SecondsTenMinute = 10 * 60;
+
     public final static int curTimestamp() {
         return (int)(System.currentTimeMillis() / 1000);
     }

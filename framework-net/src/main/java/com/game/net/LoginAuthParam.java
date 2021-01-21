@@ -17,9 +17,14 @@ public class LoginAuthParam {
     private String platform;
 
     /**
+     * 区服名字
+     */
+    private String server;
+
+    /**
      * 区服id
      */
-    private int server;
+    private int serverId;
 
     /**
      * 参数
@@ -63,12 +68,20 @@ public class LoginAuthParam {
         this.platform = platform;
     }
 
-    public int getServer() {
+    public String getServer() {
         return server;
     }
 
-    public void setServer(int server) {
+    public void setServer(String server) {
         this.server = server;
+    }
+
+    public int getServerId() {
+        return serverId;
+    }
+
+    public void setServerId(int serverId) {
+        this.serverId = serverId;
     }
 
     public String getParam() {

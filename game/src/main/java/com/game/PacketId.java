@@ -12,7 +12,7 @@ public class PacketId {
          */
         public static final short REQ_LOGIN_AUTH = 1;
         /**
-         * 返回验证信息
+         * 返回登陆验证信息
          */
         public static final short RESP_LOGIN_AUTH = 2;
         /**
@@ -65,6 +65,10 @@ public class PacketId {
          * 返回随机名（不分性别，仅供展示）
          */
         public static final short RESP_NAME_RANDOM_SHOW = 113;
+        /**
+         * 返回封号倒计时
+         */
+        public static final short RESP_FORBIDED_TIME_LESS = 114;
     }
 
     /**

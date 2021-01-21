@@ -152,11 +152,19 @@ public class GameSession {
     }
 
     private void genASKey() {
-        this.account_server = getASKey(loginAuthParam.getAccount(), loginAuthParam.getServer());
+        this.account_server = getASKey(loginAuthParam.getAccount(), loginAuthParam.getServerId());
     }
 
     public String getASKey(String account, int server) {
         return account + "_" + server;
+    }
+
+    public String getASKey() {
+        return account_server;
+    }
+
+    public int getServerId() {
+        return loginAuthParam == null ? 0 : loginAuthParam.getServerId();
     }
 
     public void ensureUnknowArgs() {

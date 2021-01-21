@@ -6,7 +6,11 @@ import com.game.logic.cross.packet.CrossPingPacket;
 import com.game.net.CloseCause;
 import com.game.net.packet.PacketFactory;
 import com.game.net.packet.Response;
+import com.game.net.packet.ResponsePacket;
 import com.game.util.GameSession;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 
 /**
  * @Author: liguorui
@@ -58,5 +62,15 @@ public class PacketUtils {
     public static Response sendCrossChannelIdle() {
         CrossPingPacket pingPacket = PacketFactory.createPacket(PacketId.Cross.CROSS_PING);
         return pingPacket.write();
+    }
+
+    public static ChannelFuture sendWithFuture(Channel channel, ResponsePacket packet) {
+        Response resp = packet.write();
+        return channel.writeAndFlush(resp);
+    }
+
+    public static void sendAndClose(GameSession session, ResponsePacket packet) {
+        ChannelFuture future = sendWithFuture(session.getChannel(), packet);
+        future.addListener(ChannelFutureListener.CLOSE);
     }
 }

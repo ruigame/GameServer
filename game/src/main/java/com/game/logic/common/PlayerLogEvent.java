@@ -3,6 +3,7 @@ package com.game.logic.common;
 import com.game.log.LogAppender;
 import com.game.log.LogEvent;
 import com.game.logic.player.entity.PlayerEntity;
+import com.game.util.Context;
 
 /**
  * @Author: liguorui
@@ -11,7 +12,7 @@ import com.game.logic.player.entity.PlayerEntity;
 public abstract class PlayerLogEvent extends LogEvent {
 
     protected String platform; //平台
-    protected int sid; //区服id
+    protected int serverId; //区服id
     protected String pid;
     protected String gid;
     protected String account;
@@ -25,10 +26,10 @@ public abstract class PlayerLogEvent extends LogEvent {
 
     }
 
-    public PlayerLogEvent(String platform, int sid, String account, long playerId, String playerName, String pid, String gid, String param) {
+    public PlayerLogEvent(String platform, int serverId, String account, long playerId, String playerName, String pid, String gid, String param) {
         super();
         this.platform = platform;
-        this.sid = sid;
+        this.serverId = serverId;
         this.account = account;
         this.playerId = playerId;
         this.time = System.currentTimeMillis();
@@ -39,11 +40,13 @@ public abstract class PlayerLogEvent extends LogEvent {
     }
 
     public PlayerLogEvent(PlayerActor playerActor) {
-
+        this(Context.getBean(ConfigService.class).getPlatform(), Context.getBean(ConfigService.class).getOriServerId(),
+                playerActor.getAccount(), playerActor.getId(), playerActor.getName(), playerActor.getPid(), playerActor.getGid(), playerActor.getParam());
     }
 
     public PlayerLogEvent(PlayerEntity playerEntity) {
-
+        this(Context.getBean(ConfigService.class).getPlatform(), Context.getBean(ConfigService.class).getOriServerId(),
+                playerEntity.getAccount(), playerEntity.getPlayerId(), playerEntity.getName(), playerEntity.getPid(), playerEntity.getGid(), playerEntity.getParams());
     }
 
     public long getPlayerId() {
@@ -58,7 +61,7 @@ public abstract class PlayerLogEvent extends LogEvent {
         return LogAppender.create(256)
                 .appendKeyValue("time", time)
                 .appendKeyValue("platform", platform)
-                .appendKeyValue("sid", sid)
+                .appendKeyValue("serverId", serverId)
                 .appendKeyValue("pid", pid)
                 .appendKeyValue("gid", gid)
                 .appendKeyValue("account", account)

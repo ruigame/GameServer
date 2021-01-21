@@ -13,6 +13,7 @@ public class ConnectInfo {
     private int respSN;
 
     public ConnectInfo(LoginAuthParam loginAuthParam, String connectKey, int respSN) {
+        super();
         this.loginAuthParam = loginAuthParam;
         this.connectKey = connectKey;
         this.respSN = respSN;

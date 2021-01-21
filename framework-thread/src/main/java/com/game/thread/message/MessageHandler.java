@@ -304,4 +304,8 @@ public class MessageHandler<H extends IMessageHandler<?>> implements Runnable, I
             this.future = future;
         }
     }
+
+    public Queue<IMessage<H>> getMessages() {
+        return messages;
+    }
 }

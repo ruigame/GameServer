@@ -2,7 +2,6 @@ package com.game.logic.common;
 
 import com.game.PacketId;
 import com.game.base.GameSessionHelper;
-import com.game.base.IPlayer;
 import com.game.base.ListenerHandler;
 import com.game.base.PacketUtils;
 import com.game.logic.RespLoginConflictPacket;
@@ -20,7 +19,6 @@ import com.game.thread.message.IMessage;
 import com.game.util.Context;
 import com.game.util.GameSession;
 import com.game.util.GameSessionStatus;
-import com.game.util.ListenerManager;
 import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,8 +85,8 @@ public class OnlineService {
         return true;
     }
 
-    public GameSession getSession(String key) {
-        return ACCOUNT_TO_SESSION.get(key);
+    public GameSession getSession(String account) {
+        return ACCOUNT_TO_SESSION.get(account);
     }
 
     public void removeSession(final GameSession session) {

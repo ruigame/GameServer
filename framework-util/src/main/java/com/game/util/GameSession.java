@@ -194,6 +194,19 @@ public class GameSession {
         return playerId;
     }
 
+    public String getPid() {
+        return loginAuthParam == null ? "" : loginAuthParam.getPid();
+    }
+
+    public String getGid() {
+        return loginAuthParam == null ? "" : loginAuthParam.getGid();
+    }
+
+    public void putUnknowArgs(String key, Object value) {
+        ensureUnknowArgs();
+        unkonwArgs.put(key, value);
+    }
+
     public void setPlayerId(long playerId) {
         this.playerId = playerId;
     }

@@ -2,15 +2,24 @@ package com.game.logic.player;
 
 import com.game.PacketId;
 import com.game.base.GameSessionHelper;
+import com.game.base.ListenerHandler;
 import com.game.base.PacketUtils;
+import com.game.base.exception.PlayerIdOverflowException;
+import com.game.base.exception.ServerNotHoldedException;
 import com.game.logic.common.ConfigService;
 import com.game.logic.common.OnlineService;
 import com.game.logic.common.PlayerActor;
+import com.game.logic.common.PlayerNameUtils;
 import com.game.logic.player.domain.ConnectInfo;
+import com.game.logic.player.domain.Gender;
+import com.game.logic.player.domain.RoleType;
+import com.game.logic.player.entity.PlayerEntity;
+import com.game.logic.player.log.CreatePlayerLogEvent;
 import com.game.logic.player.log.RegisterLogEvent;
 import com.game.logic.player.packet.req.*;
-import com.game.logic.player.packet.resp.RespForbidedMessagePacket;
-import com.game.logic.player.packet.resp.RespLoginAuthPacket;
+import com.game.logic.player.packet.resp.*;
+import com.game.net.ChannelUtils;
+import com.game.net.CloseCause;
 import com.game.net.LoginAuthParam;
 import com.game.net.packet.PacketFactory;
 import com.game.thread.gate.GateKeeper;
@@ -19,6 +28,7 @@ import com.game.util.*;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import io.netty.channel.Channel;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,6 +36,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -224,22 +237,186 @@ public class BaseService implements IBaseService{
 
     @Override
     public void randomName(GameSession session, ReqNameRandomPacket packet) {
-
+        String name = PlayerNameUtils.getRandomName(packet.getGender());
+        if (name != null) {
+            RespNameRandomPacket resp = PacketFactory.createPacket(PacketId.Base.RESP_NAME_RANDOM);
+            resp.init(name);
+            GameSessionHelper.sendPacket(session, resp);
+        }
     }
 
     @Override
     public void roleCreate(GameSession session, ReqPlayerCreatePacket packet) {
+        Long playerId = playerService.getPlayerIdByASKey(session.getASKey());
+        Preconditions.checkNotNull(playerId, "ASKey:%s, account:%s, ip:%s", session.getASKey(), session.getAccount(), session.getIp());
+        if (playerId > 0) {
+            return;
+        }
+        String nickName = packet.getNickName();
+        byte roleTypeByte = packet.getRoleType();
+        byte genderByte = packet.getGender();
+        RoleType roleType = RoleType.getById(roleTypeByte);
+        Gender gender = Gender.getById(genderByte);
+        nickName = StringUtils.trim(nickName);
 
+        RespRoleCreateResultPacket resp = PacketFactory.createPacket(PacketId.Base.RESP_CREATE_PLAYER);
+
+        //达到创角限制
+        if (configService.getDayAfterOpenServer() >= 10) {
+            resp.fail4PlayerCreateLimit();
+            GameSessionHelper.sendPacket(session, resp);
+            return;
+        }
+
+        if (roleType == RoleType.None) {
+            resp.fail4InvalidRoleType();
+            GameSessionHelper.sendPacket(session, resp);
+            return;
+        }
+
+        if (!playerService.registerTemporaryNickName(nickName)) {
+            resp.fail4NameExists();
+            GameSessionHelper.sendPacket(session, resp);
+            return;
+        }
+
+        String asKey = session.getASKey();
+        try {
+            String account = session.getAccount();
+            int serverId = session.getServerId();
+            PlayerEntity playerEntity = playerService.createPlayer(session,
+                    serverId, account, nickName, roleType, gender);
+            if (playerEntity != null) {
+                playerService.updateTemporaryNickName(nickName, playerEntity.getPlayerId());
+                playerService.updateAccount(asKey, playerEntity.getPlayerId());
+                resp.succ();
+                GameSessionHelper.sendPacket(session, resp);
+                handlePlayerCreate(session, playerEntity);
+            } else {
+                playerService.unregisterNickName(nickName);
+                playerService.clearAccount2PlayerId(asKey);
+                resp.fail();
+                GameSessionHelper.sendPacket(session, resp);
+                ExceptionUtils.log("account :{}, server:{} 创角失败", account, serverId);
+                return;
+            }
+        } catch (PlayerIdOverflowException e) {
+            playerService.unregisterNickName(nickName);
+            playerService.clearAccount2PlayerId(asKey);
+            ExceptionUtils.log(e);
+            resp.fail4OverFlow();
+            GameSessionHelper.sendPacket(session, resp);
+            return;
+        } catch (ServerNotHoldedException e2) {
+            playerService.unregisterNickName(nickName);
+            playerService.clearAccount2PlayerId(asKey);
+            ExceptionUtils.log(e2);
+            resp.fail4NotServer();
+            GameSessionHelper.sendPacket(session, resp);
+            return;
+        } catch (Exception e3) {
+            playerService.unregisterNickName(nickName);
+            playerService.clearAccount2PlayerId(asKey);
+            ExceptionUtils.log(e3);
+            resp.fail();
+            GameSessionHelper.sendPacket(session, resp);
+            return;
+        }
+    }
+
+    public void handlePlayerCreate(final GameSession session, PlayerEntity playerEntity) {
+        final long playerId = playerEntity.getPlayerId();
+        PlayerActor playerActor = new PlayerActor();
+        playerActor.setPlayerId(playerId);
+        playerActor.setPlayerEntity(playerEntity);
+        playerActor.setInit(true);
+        ListenerHandler.getInstance().firePlayerCreateListener(playerActor, session);
+        new CreatePlayerLogEvent(playerActor, session.getPid(), session.getGid(), session.getParam()).post();
+        playerActor = playerService.cachePlayerActor(playerId, playerActor);
+        session.putUnknowArgs("player", playerActor);
     }
 
     @Override
     public void loginAsk(GameSession session, ReqLoginAskPacket packet) {
-
+        handlePlayerLogin(session);
     }
 
     @Override
     public void reconnect(GameSession session, ReqReconnectPacket packet) {
+        logger.debug("handlePlayerReconnect {}", packet.getAccount());
+        String asKey = packet.getAccount() + "_" + packet.getServerId();
+        ConnectInfo connectInfo = asKey2ConnectInfoCache.getIfPresent(asKey);
+        RespReconnectPacket resp = PacketFactory.createPacket(PacketId.Base.RESP_RECONNECT);
 
+        GameSession oldSession = onlineService.getSession(packet.getAccount());
+
+        if (connectInfo == null && oldSession == null) {
+            resp.refresh();
+            GameSessionHelper.sendPacket(session, resp);
+            logger.debug("{} reconnect refresh 1", packet.getAccount());
+            return;
+        }
+
+        String connectKey = connectInfo != null ? connectInfo.getConnectKey() : oldSession.getConnectKey();
+        int respSN = connectInfo != null ? connectInfo.getRespSN() : oldSession.getRespSN();
+
+        if (StringUtils.isBlank(connectKey) || !connectKey.equals(packet.getConnectKey())) { //校验不通过
+            resp.refresh();
+            GameSessionHelper.sendPacket(session, resp);
+            logger.debug("{} reconnect refresh 2", packet.getAccount());
+            return;
+        }
+
+        //校验通过后
+        if (oldSession != null && oldSession.isClose() && !oldSession.getCloseCause().isRelogin()) { //主动关闭
+            resp.refresh();
+            GameSessionHelper.sendPacket(session, resp);
+            logger.debug("{} reconnect refresh 3", packet.getAccount());
+            return;
+        }
+
+        if (!session.compareAndSetStatus(GameSessionStatus.INIT, GameSessionStatus.AUTHED)) {
+            resp.refresh();
+            GameSessionHelper.sendPacket(session, resp);
+            logger.debug("{} reconnect refresh 4", packet.getAccount());
+            return;
+        }
+
+        LoginAuthParam loginAuthParam = connectInfo != null ? connectInfo.getLoginAuthParam() : oldSession.getLoginAuthParam();
+        session.setLoginAuthParam(loginAuthParam);
+
+        //判断是否存在
+        if (oldSession == null) {
+            resp.relogin();
+            GameSessionHelper.sendPacket(session, resp);
+            logger.debug("{} reconnect relogin 1", packet.getAccount());
+            return;
+        }
+
+        if (respSN != packet.getRespSN()) {
+            if (oldSession.isActive()) {//前端已经断开
+                oldSession.close(CloseCause.CLIENT_NET_ERROR);
+                logger.debug("{} 前端已经断开", packet.getAccount());
+            }
+            resp.relogin();
+            GameSessionHelper.sendPacket(session, resp);
+            logger.debug("{} reconnect relogin 2", packet.getAccount());
+            return;
+        }
+
+        synchronized (oldSession) {
+            if (!oldSession.isExiting()) {
+                Channel oldChannel = oldSession.changeChannel(session.getChannel());
+                ChannelUtils.clearAndCloseChannel(oldChannel); //清除引用，关闭链接（可能后段连接还没断）
+                ChannelUtils.replaceChannelSession(oldSession.getChannel(), oldSession);
+                resp.success();
+                logger.debug("{} reconnect success", packet.getAccount());
+            } else {
+                resp.relogin();
+                logger.debug("{} reconnect relogin 3", packet.getAccount());
+            }
+        }
+        GameSessionHelper.sendPacket(session, resp);
     }
 
     @Override
@@ -249,6 +426,18 @@ public class BaseService implements IBaseService{
 
     @Override
     public void reqRandomNamePacket(GameSession session, ReqRandomNameShowPacket packet) {
-
+        Collection<String> names = playerService.getAllPlayerName();
+        String name;
+        if (names.size() > 50) {
+            List<String> nameList = new ArrayList<>();
+            name = RandomUtils.randEqualPro(nameList);
+        } else {
+            name = PlayerNameUtils.getRandomName(RandomUtils.nextBoolean() ? Gender.MALE.getId() : Gender.FEMALE.getId());
+        }
+        if (name != null) {
+            RespRandomnamePacket resp = PacketFactory.createPacket(PacketId.Base.RESP_NAME_RANDOM_SHOW);
+            resp.init(name);
+            GameSessionHelper.sendPacket(session, resp);
+        }
     }
 }

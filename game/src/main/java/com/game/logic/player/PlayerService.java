@@ -442,4 +442,8 @@ public class PlayerService {
         }
         return false;
     }
+
+    public Collection<String> getAllPlayerName() {
+        return playerNameMap.keySet();
+    }
 }

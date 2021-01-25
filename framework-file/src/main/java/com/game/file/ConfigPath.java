@@ -96,4 +96,9 @@ public class ConfigPath {
      * 外挂检测
      */
     public static final String PLUG_PROPERTIES = BASE_PARH + "/common/plug.properties";
+
+    /**
+     * 随机取名配置
+     */
+    public static final String RANDOM_NAME_PATH = BASE_PARH + "/common/ConfigRandomName.xml";
 }

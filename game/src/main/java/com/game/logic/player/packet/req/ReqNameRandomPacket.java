@@ -13,6 +13,9 @@ import com.game.net.packet.RequestBeforeLoginPacket;
 @Packet(commandId = PacketId.Base.REQ_NAME_RANDOM)
 public class ReqNameRandomPacket extends RequestBeforeLoginPacket {
 
+    /**
+     * 性别
+     */
     private byte gender;
 
     @Override

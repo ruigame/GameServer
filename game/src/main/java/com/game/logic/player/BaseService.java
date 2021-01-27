@@ -6,10 +6,10 @@ import com.game.base.ListenerHandler;
 import com.game.base.PacketUtils;
 import com.game.base.exception.PlayerIdOverflowException;
 import com.game.base.exception.ServerNotHoldedException;
-import com.game.logic.common.ConfigService;
-import com.game.logic.common.OnlineService;
-import com.game.logic.common.PlayerActor;
-import com.game.logic.common.PlayerNameUtils;
+import com.game.logic.common.*;
+import com.game.logic.common.manger.ConfigRandomNameManger;
+import com.game.logic.common.packet.req.ReqMessageVersionPacket;
+import com.game.logic.common.packet.resp.RespMessageVersion;
 import com.game.logic.player.domain.ConnectInfo;
 import com.game.logic.player.domain.Gender;
 import com.game.logic.player.domain.RoleType;
@@ -36,9 +36,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,12 +50,12 @@ import java.util.concurrent.TimeUnit;
  * @Date: 2021/1/20 上午12:01
  */
 @Component
-public class BaseService implements IBaseService{
+public class BaseService implements IBaseService, ServerStarter{
 
     private Logger logger = LoggerFactory.getLogger("base");
 
-//    @Autowired
-//    private WorldService worldService;
+    @Autowired
+    private WordService wordService;
 
     @Autowired
     private PlayerService playerService;
@@ -65,8 +69,18 @@ public class BaseService implements IBaseService{
     @Autowired
     private ForbidService forbidService;
 
+    @Autowired
+    private ConfigRandomNameManger configRandomNameManger;
+
     private Cache<String, ConnectInfo> asKey2ConnectInfoCache = CacheBuilder.newBuilder()
-            .expireAfterAccess(30, TimeUnit.MINUTES).build();
+            .expireAfterAccess(60, TimeUnit.MINUTES).build();
+
+    private String messageVersion = "0";
+
+    @Override
+    public void reqMessageVersion(GameSession session, ReqMessageVersionPacket req) {
+        GameSessionHelper.sendPacket(session, RespMessageVersion.create(messageVersion));
+    }
 
     @Override
     public void loginAuth(GameSession session, ReqLoginAuthPacket packet) {
@@ -76,7 +90,7 @@ public class BaseService implements IBaseService{
             return;
         }
 
-        int ipPlayerCount = 0;
+        int ipPlayerCount;
         String ip = session.getIp();
         //每个ip限制登陆人数
         if (!configService.isIpLimitWhite(ip) && (ipPlayerCount = onlineService.getIpPlayerCount(ip)) >= configService.getIpLimitCount()) {
@@ -133,7 +147,12 @@ public class BaseService implements IBaseService{
             return false;
         }
 
-        int timestamp = Integer.parseInt(loginAuthParam.getTime());
+        int timestamp = loginAuthParam.getTime();
+        if (timestamp < 1) {
+            logger.warn("serverId: {} not hold!", loginAuthParam.getServerId());
+            return false;
+        }
+
         if (Math.abs(timestamp - TimeUtils.timestamp()) > TimeUtils.SecondsTenMinute) {
             logger.warn("param time diff too long curTime:{}, paramTime:{}", TimeUtils.timestamp(), loginAuthParam.getTime());
             return false;
@@ -142,18 +161,21 @@ public class BaseService implements IBaseService{
         StringBuilder sb = this.initContent(loginAuthParam);
         sb.append(configService.getAuthKey());
         String expectSign = DigestUtils.md5Hex(sb.toString());
-        if (expectSign.equals(loginAuthParam.getSign())) { //md5加密码验证
-            StringBuilder temp = this.initContent(loginAuthParam);
-            logger.warn(temp.toString());
-            logger.warn("param sign not match !{} {}", loginAuthParam.getServerId(), expectSign);
+        if (!expectSign.equals(loginAuthParam.getSign())) { //md5加密码验证
+            logger.warn(sb.toString());
+            logger.warn("param sign not match !{} {}", loginAuthParam.getSign(), expectSign);
             return false;
         }
         return true;
     }
 
     private StringBuilder initContent(LoginAuthParam loginAuthParam) {
-        StringBuilder temp = new StringBuilder(128).append(loginAuthParam.getAccount()).append(loginAuthParam.getPlatform())
-                .append(loginAuthParam.getGid()).append(loginAuthParam.getPid()).append(loginAuthParam.getTime()).append(loginAuthParam.getServerId());
+        StringBuilder temp = new StringBuilder(128)
+                            .append(loginAuthParam.getGid())
+                            .append(loginAuthParam.getPid())
+                            .append(loginAuthParam.getServerId())
+                            .append(loginAuthParam.getAccount())
+                            .append(loginAuthParam.getTime());
         return temp;
     }
 
@@ -171,7 +193,12 @@ public class BaseService implements IBaseService{
         UseTimer useTimer = new UseTimer(session.getAccount() + "handlePlayerLogin0", 800);
         logger.debug("handlePlayerLogin0 {}", session.getAccount());
         final long playerId = playerService.getPlayerIdByASKey(session.getASKey());
-        Preconditions.checkArgument(playerId > 0, "%s %s playerId is invalid", session.getServerId(), session.getAccount());
+        if (playerId <= 0) {
+            logger.warn("{} {} playerId is invalid", session.getServerId(), session.getAccount());
+            session.close(CloseCause.Illegal_Operation);
+            return;
+        }
+
         PlayerActor player = playerService.getPlayerActor(playerId);
         useTimer.printUseTime("11");
 
@@ -208,7 +235,7 @@ public class BaseService implements IBaseService{
                 public void execute(GateKeeper k) {
                     handlePlayerLogin0(session, times + 1);
                 }
-            }, 500 & times, TimeUnit.MILLISECONDS);
+            }, 500, TimeUnit.MILLISECONDS);
             return;
         }
 
@@ -217,7 +244,7 @@ public class BaseService implements IBaseService{
             @Override
             public void execute(PlayerActor finalPlayer) {
                 session.setPlayerId(finalPlayer.getId());
-//                playerService.cachePlayerActor(finalPlayer); //要解决强饮用
+//                playerService.cachePlayerActor(finalPlayer); //要解决强引用
                 finalPlayer.setSession(session);
                 playerService.playerLogin(finalPlayer);
                 useTimer.printUseTime("44");
@@ -237,7 +264,7 @@ public class BaseService implements IBaseService{
 
     @Override
     public void randomName(GameSession session, ReqNameRandomPacket packet) {
-        String name = PlayerNameUtils.getRandomName(packet.getGender());
+        String name = getRandomName(packet.getGender());
         if (name != null) {
             RespNameRandomPacket resp = PacketFactory.createPacket(PacketId.Base.RESP_NAME_RANDOM);
             resp.init(name);
@@ -252,14 +279,39 @@ public class BaseService implements IBaseService{
         if (playerId > 0) {
             return;
         }
-        String nickName = packet.getNickName();
-        byte roleTypeByte = packet.getRoleType();
-        byte genderByte = packet.getGender();
+        doRoleCreate(session, packet);
+    }
+
+    public void doRoleCreate(GameSession session, ReqPlayerCreatePacket req) {
+        String nickName = req.getNickName();
+        nickName = StringUtils.trim(nickName);
+
+        byte roleTypeByte = req.getRoleType();
+        byte genderByte = req.getGender();
         RoleType roleType = RoleType.getById(roleTypeByte);
         Gender gender = Gender.getById(genderByte);
         nickName = StringUtils.trim(nickName);
 
         RespRoleCreateResultPacket resp = PacketFactory.createPacket(PacketId.Base.RESP_CREATE_PLAYER);
+
+        if (roleType == null) {
+            resp.fail4NotRoleType();
+            GameSessionHelper.sendPacket(session, resp);
+            return;
+        }
+
+        if (gender == null) {
+            resp.fail4NotGender();
+            GameSessionHelper.sendPacket(session, resp);
+            return;
+        }
+
+        boolean resultState = wordService.isAvailableFormatForCreate(nickName);
+        if (!resultState) {
+            resp.fail4NameFormat();
+            GameSessionHelper.sendPacket(session, resp);
+            return;
+        }
 
         //达到创角限制
         if (configService.getDayAfterOpenServer() >= 10) {
@@ -284,8 +336,7 @@ public class BaseService implements IBaseService{
         try {
             String account = session.getAccount();
             int serverId = session.getServerId();
-            PlayerEntity playerEntity = playerService.createPlayer(session,
-                    serverId, account, nickName, roleType, gender);
+            PlayerEntity playerEntity = playerService.createPlayer(session, serverId, account, nickName, roleType, gender);
             if (playerEntity != null) {
                 playerService.updateTemporaryNickName(nickName, playerEntity.getPlayerId());
                 playerService.updateAccount(asKey, playerEntity.getPlayerId());
@@ -346,9 +397,8 @@ public class BaseService implements IBaseService{
         logger.debug("handlePlayerReconnect {}", packet.getAccount());
         String asKey = packet.getAccount() + "_" + packet.getServerId();
         ConnectInfo connectInfo = asKey2ConnectInfoCache.getIfPresent(asKey);
-        RespReconnectPacket resp = PacketFactory.createPacket(PacketId.Base.RESP_RECONNECT);
-
         GameSession oldSession = onlineService.getSession(packet.getAccount());
+        RespReconnectPacket resp = PacketFactory.createPacket(PacketId.Base.RESP_RECONNECT);
 
         if (connectInfo == null && oldSession == null) {
             resp.refresh();
@@ -410,13 +460,15 @@ public class BaseService implements IBaseService{
                 ChannelUtils.clearAndCloseChannel(oldChannel); //清除引用，关闭链接（可能后段连接还没断）
                 ChannelUtils.replaceChannelSession(oldSession.getChannel(), oldSession);
                 resp.success();
+                GameSessionHelper.sendPacket(session, resp);
                 logger.debug("{} reconnect success", packet.getAccount());
             } else {
                 resp.relogin();
+                GameSessionHelper.sendPacket(session, resp);
                 logger.debug("{} reconnect relogin 3", packet.getAccount());
             }
         }
-        GameSessionHelper.sendPacket(session, resp);
+
     }
 
     @Override
@@ -429,15 +481,60 @@ public class BaseService implements IBaseService{
         Collection<String> names = playerService.getAllPlayerName();
         String name;
         if (names.size() > 50) {
-            List<String> nameList = new ArrayList<>();
+            List<String> nameList = new ArrayList<>(names);
             name = RandomUtils.randEqualPro(nameList);
         } else {
-            name = PlayerNameUtils.getRandomName(RandomUtils.nextBoolean() ? Gender.MALE.getId() : Gender.FEMALE.getId());
+            name = getRandomName(RandomUtils.nextBoolean() ? Gender.MALE.getId() : Gender.FEMALE.getId());
         }
         if (name != null) {
             RespRandomnamePacket resp = PacketFactory.createPacket(PacketId.Base.RESP_NAME_RANDOM_SHOW);
             resp.init(name);
             GameSessionHelper.sendPacket(session, resp);
+        }
+    }
+
+    public void invalidateAllConnectInfo() {
+        asKey2ConnectInfoCache.invalidateAll();
+    }
+
+    public void invalidatePlayerConnectInfo(String account, int serverId) {
+        String key = genKey(account, serverId);
+        asKey2ConnectInfoCache.invalidate(key);
+    }
+
+    /**
+     * 获取随机角色名
+     * @param sex
+     * @return
+     */
+    private String getRandomName(int sex) {
+        String name = null;
+        //随机50次，没有合适的返回null
+        for (int i = 0; i < 50; i++) {
+            name = configRandomNameManger.getName(sex == 1);
+            if (name != null && !name.equals("") && !playerService.isNameExist(name) && wordService.isAvailableFormatForCreate(name)) {
+                break;
+            }
+            name = null;
+        }
+        return name;
+    }
+
+    @Override
+    public int getOrder() {
+        return ServerStarter.LOWEST;
+    }
+
+    @Override
+    public void init() {
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream("version")) {
+            if (Objects.isNull(in)) {
+                return;
+            }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            messageVersion = reader.readLine();
+        } catch (Exception e) {
+            ExceptionUtils.log(e);
         }
     }
 }

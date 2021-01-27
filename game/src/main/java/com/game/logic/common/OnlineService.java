@@ -136,12 +136,10 @@ public class OnlineService {
                         player.logout();
                         ListenerHandler.getInstance().firePlayerLogoutListener(player);
                     }
-                    removeSession(oldSession);
                 }
             });
-        } else {
-            removeSession(oldSession);
         }
+        removeSession(oldSession);
     }
 
     public void closeInactiveSession(final GameSession session) {

@@ -1,5 +1,6 @@
 package com.game.logic.player;
 
+import com.game.logic.common.packet.req.ReqMessageVersionPacket;
 import com.game.logic.player.packet.req.*;
 import com.game.net.packet.PacketHandler;
 import com.game.util.GameSession;
@@ -10,6 +11,13 @@ import com.game.util.GameSession;
  */
 @PacketHandler
 public interface IBaseService {
+
+    /**
+     * 查看服务器当前版本号
+     * @param session
+     * @param req
+     */
+    void reqMessageVersion(GameSession session, ReqMessageVersionPacket req);
 
     /**
      * 登陆验证

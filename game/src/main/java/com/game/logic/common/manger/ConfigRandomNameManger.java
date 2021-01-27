@@ -2,7 +2,9 @@ package com.game.logic.common.manger;
 
 import com.game.file.ConfigPath;
 import com.game.file.xml.XmlModelListManager;
+import com.game.logic.common.WordService;
 import com.game.logic.common.domain.ConfigRandomName;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -16,64 +18,76 @@ import java.util.concurrent.ThreadLocalRandom;
 @Component
 public class ConfigRandomNameManger extends XmlModelListManager<ConfigRandomName> {
 
-    private final static int TYPE_FIRST_NAME = 1;
-    private final static int TYPE_SECOND_NAME = 2;
-    private final static int TYPE_THIRD_NAME_MALE = 3;
-    private final static int TYPE_THIRD_NAME_FEMALE = 4;
-    private final static int TYPE_ALL_NAME = 5; //该类型的昵称单独出现，不拼接
+    private final static int TYPE_FIRST_NAME = 1; //性
+    private final static int TYPE_NAME_MALE = 2; //男名
+    private final static int TYPE_NAME_FEMALE = 3; //女名
+    private final static int TYPE_ALL_NAME_MALE = 4; //男全名
+    private final static int TYPE_ALL_NAME_FEMALE = 5; //女全名
 
     private List<String> firstNames;
-    private List<String> secondNames;
-    private List<String> thirdNameMales;
-    private List<String> thirdNameFeMales;
-    private List<String> allNames;
+    private List<String> nameMales;
+    private List<String> nameFeMales;
+    private List<String> allNamesMales;
+    private List<String> allNamesFemales;
+
+    @Autowired
+    private WordService wordService;
 
 
     public ConfigRandomNameManger() {
-        super(ConfigPath.RANDOM_NAME_PATH);
+        super(ConfigPath.RandomName.RANDOM_NAME_PATH);
     }
 
     @Override
     protected void afterLoad() {
         List<String> firstNames = new ArrayList<>();
-        List<String> secondNames = new ArrayList<>();
-        List<String> thirdNameMales = new ArrayList<>();
-        List<String> thirdNameFeMales = new ArrayList<>();
-        List<String> allNames = new ArrayList<>();
+        List<String> nameMales = new ArrayList<>();
+        List<String> nameFeMales = new ArrayList<>();
+        List<String> allNamesMales = new ArrayList<>();
+        List<String> allNamesFemales = new ArrayList<>();
         int maxId = 0;
 
-        for (ConfigRandomName configRandomName : getModelCollection()) {
-            String name = configRandomName.getName();
-            if (configRandomName.getType() == TYPE_FIRST_NAME) {
+        for (ConfigRandomName config : getModelCollection()) {
+            String name = config.getName();
+            int type = config.getType();
+            if (type == TYPE_FIRST_NAME) {
                 firstNames.add(name);
-            } else if (configRandomName.getType() == TYPE_SECOND_NAME) {
-                secondNames.add(name);
-            } else if (configRandomName.getType() == TYPE_THIRD_NAME_MALE) {
-                thirdNameMales.add(name);
-            } else if (configRandomName.getType() == TYPE_THIRD_NAME_FEMALE) {
-                thirdNameFeMales.add(name);
-            } else if (configRandomName.getType() == TYPE_ALL_NAME) {
-                allNames.add(name);
+            } else if (type == TYPE_NAME_MALE) {
+                nameMales.add(name);
+            } else if (type == TYPE_NAME_FEMALE) {
+                nameFeMales.add(name);
+            } else if (type == TYPE_ALL_NAME_MALE) {
+                allNamesMales.add(name);
+            } else if (type == TYPE_ALL_NAME_FEMALE) {
+                allNamesFemales.add(name);
             }
-            maxId = configRandomName.getID() > maxId ? configRandomName.getID() : maxId;
+            maxId = config.getID() > maxId ? config.getID() : maxId;
         }
 
         this.firstNames = firstNames;
-        this.secondNames = secondNames;
-        this.thirdNameMales = thirdNameMales;
-        this.thirdNameFeMales = thirdNameFeMales;
-        this.allNames = allNames;
+        this.nameMales = nameMales;
+        this.nameFeMales = nameFeMales;
+        this.allNamesMales = allNamesMales;
+        this.allNamesFemales = allNamesFemales;
         checkValid();
     }
 
-    public String[] getRandomName(boolean isMale) {
-        List<String> third = isMale ? this.thirdNameMales : this.thirdNameFeMales;
-        String [] strs = new String[4];
-        strs[0] = getRandomname(this.firstNames);
-        strs[1] = getRandomname(this.secondNames);
-        strs[2] = getRandomname(third);
-        strs[3] = getRandomname(this.allNames);
-        return strs;
+    public String getName(boolean isMale) {
+        List<String> nameList = new ArrayList<>();
+        String firstName = getRandomname(this.firstNames);
+        for (String secName : isMale ? this.nameMales : this.nameFeMales) {
+            String name = firstName + secName;
+            nameList.add(name);
+        }
+
+        nameList.addAll(isMale ? allNamesMales : allNamesFemales);
+        return getRandomName(nameList);
+    }
+
+    private String getRandomName(List<String> list) {
+        if (list.isEmpty()) return "";
+        int index = ThreadLocalRandom.current().nextInt(list.size());
+        return index > -1 ? list.get(index) : "";
     }
 
     private String getRandomname(List<String> list) {
@@ -83,30 +97,32 @@ public class ConfigRandomNameManger extends XmlModelListManager<ConfigRandomName
     }
 
     private void checkValid() {
-        //检查所有男组合名
-        for (String firstName : firstNames) {
-            for (String thirdNameMale : thirdNameMales) {
-                String name = firstName + thirdNameMale;
-                checkName(name);
-            }
-        }
-
-        //检查所有女组合名
-        for (String secondName : secondNames) {
-            for (String thirdNameFeMale : thirdNameFeMales) {
-                String name = secondName + thirdNameFeMale;
-                checkName(name);
-            }
-        }
-
-        //检查全名
-        for (String name : allNames) {
-            checkName(name);
-        }
+//        //检查所有男组合名
+//        for (String firstName : firstNames) {
+//            for (String thirdNameMale : thirdNameMales) {
+//                String name = firstName + thirdNameMale;
+//                checkName(name);
+//            }
+//        }
+//
+//        //检查所有女组合名
+//        for (String secondName : secondNames) {
+//            for (String thirdNameFeMale : thirdNameFeMales) {
+//                String name = secondName + thirdNameFeMale;
+//                checkName(name);
+//            }
+//        }
+//
+//        //检查全名
+//        for (String name : allNames) {
+//            checkName(name);
+//        }
     }
 
     //检查合法性
     private void checkName(String name) {
-
+        if (wordService.nameHasBadWords(name)) {
+            System.err.println(name);
+        }
     }
 }

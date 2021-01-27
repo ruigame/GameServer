@@ -42,6 +42,14 @@ public enum CloseCause {
      * 后台包验证错误
      */
     ADMIN_KEY_INVALID,
+    /**
+     * 非法操作
+     */
+    Illegal_Operation,
+    /**
+     * 后台踢下线
+     */
+    KICK
     ;
 
     /**

@@ -4,101 +4,117 @@ package com.game.file;
  * @Author: liguorui
  * @Date: 2020/11/27 上午1:10
  */
-public class ConfigPath {
+public interface ConfigPath {
 
-    public static final String BASE_PARH = "config";
+    String BASE_PARH = "config";
 
-    /**
-     * 常用配置
-     */
-    public static final String COMMON_PROPERTIES = BASE_PARH + "/common/commons.properties";
+    interface BadWord {
+        /**
+         * 聊天屏蔽字路径
+         */
+        String CHEAT_BADWORD_FILE = "constant/words.txt";
+        /**
+         * 聊天屏蔽字白名单
+         */
+        String CHEAT_WHITE_FILE = "constant/white_words.txt";
+        /**
+         * 名称屏蔽字路径
+         */
+        String NAME_BADWORD_FILE = "constant/name_words.txt";
+        /**
+         * 公会名称屏蔽字路径
+         */
+        String GUILD_BADWORD_FILE = "constant/guild_words.txt";
+    }
 
-    /**
-     * java system属性
-     */
-    public static final String SYSTEM_PROPERTIES = BASE_PARH + "/common/system.properties";
+    interface Common {
+        /**
+         * 常用配置
+         */
+        String COMMON_PROPERTIES = BASE_PARH + "/common/commons.properties";
+        /**
+         * java system属性
+         */
+        String SYSTEM_PROPERTIES = BASE_PARH + "/common/system.properties";
+        /**
+         * cron任务配置
+         */
+        String CRON_TASK_CONFIG_PROPERTIES = BASE_PARH + "/common/cronTaskConfig.properties";
+        /**
+         * 改名卡改名白名单
+         */
+        String ROLE_NAME_WHITE_LIST_PROPERTIES = BASE_PARH + "/common/roleNameWhiteList.properties";
+        /**
+         * 外挂检测配置
+         */
+        String CHEAT = BASE_PARH + "/common/cheat.properties";
+        /**
+         * 其他配置
+         */
+        String MISC_PROPERTIES = BASE_PARH + "/common/misc.properties";
+        /**
+         * 外挂检测
+         */
+        String PLUG_PROPERTIES = BASE_PARH + "/common/plug.properties";
+        /**
+         * 场景数据配置
+         */
+        String SCENE_PROPERTIES = BASE_PARH + "/common/scene.properties";
+    }
 
-    /**
-     * DEBUG配置
-     */
-    public static final String DEBUG_PROPERTIES = BASE_PARH + "/independent/debug.properties";
+    interface Independent {
+        /**
+         * DEBUG配置
+         */
+        String DEBUG_PROPERTIES = "independent/debug.properties";
 
-    /**
-     * GM配置
-     */
-    public static final String GM_PROPERTIES = BASE_PARH + "/independent/gm.properties";
+        /**
+         * GM配置
+         */
+        String GM_PROPERTIES = "independent/gm.properties";
+        /**
+         * 安全验证及加密
+         */
+        String AUTH_PROPERTIES = "independent/auth.properties";
+        /**
+         * 网络设置
+         */
+        String NET_PROPERTIES = "independent/net.properties";
+        /**
+         * 服务器配置
+         */
+        String SERVER_PROPERTIES = "independent/server.properties";
 
-    /**
-     * 安全验证及加密
-     */
-    public static final String AUTH_PROPERTIES = BASE_PARH + "/independent/auth.properties";
+        /**
+         * 白名单配置
+         */
+        String WHITELIST_PROPERTIES = "independent/whiteList.properties";
+        /**
+         * IP限制
+         */
+        String IP_LIMIT = "independent/ipLimit.properties";
+        /**
+         * 后台配置
+         */
+        String BACKEND_PROPERTIES = "independent/backendSupport.properties";
+        /**
+         * 跨服配置
+         */
+        String CROSS_PROPERTIES = "independent/cross.properties";
+        /**
+         * 聊天检测
+         */
+        String CHAT_CHECK = "independent/chatCheck.properties";
+        /**
+         * 运维配置
+         */
+        String YUN_WEI = "independent/yunwei.properties";
+    }
 
-    /**
-     * 网络设置
-     */
-    public static final String NET_PROPERTIES = BASE_PARH + "/independent/net.properties";
-
-    /**
-     * 服务器配置
-     */
-    public static final String SERVER_PROPERTIES = BASE_PARH + "/independent/server.properties";
-
-    /**
-     * 白名单配置
-     */
-    public static final String WHITELIST_PROPERTIES = BASE_PARH + "/independent/whiteList.properties";
-
-    /**
-     * IP限制
-     */
-    public static final String IP_LIMIT = BASE_PARH + "/independent/whiteList.properties";
-
-    /**
-     * 跨服配置
-     */
-    public static final String CROSS_PROPERTIES = BASE_PARH + "/independent/cross.properties";
-    /**
-     * 后台配置
-     */
-    public static final String BACKEND_PROPERTIES = BASE_PARH + "/independent/backendSupport.properties";
-
-    /**
-     * 运维配置
-     */
-    public static final String YUN_WEI = BASE_PARH + "/independent/yunwei.properties";
-
-    /**
-     * 外挂检测配置
-     */
-    public static final String CHEAT = BASE_PARH + "/common/cheat.properties";
-
-    /**
-     * 场景数据配置
-     */
-    public static final String SCENE_PROPERTIES = BASE_PARH + "/common/scene.properties";
-
-    /**
-     * 聊天配置
-     */
-    public static final String CHAT_PROPERTIES = BASE_PARH + "/common/chat.properties";
-
-    /**
-     * 聊天检测
-     */
-    public static final String CHAT_CHECK = BASE_PARH + "/independent/chatCheck.properties";
-
-    /**
-     * 其他配置
-     */
-    public static final String MISC_PROPERTIES = BASE_PARH + "/common/misc.properties";
-
-    /**
-     * 外挂检测
-     */
-    public static final String PLUG_PROPERTIES = BASE_PARH + "/common/plug.properties";
-
-    /**
-     * 随机取名配置
-     */
-    public static final String RANDOM_NAME_PATH = BASE_PARH + "/common/ConfigRandomName.xml";
+    interface RandomName {
+        /**
+         * 随机取名配置
+         */
+        String RANDOM_NAME_PATH = BASE_PARH + "/common/ConfigRandomName.xml";
+    }
 }

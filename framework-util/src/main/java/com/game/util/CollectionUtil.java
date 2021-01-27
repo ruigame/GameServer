@@ -54,4 +54,12 @@ public class CollectionUtil {
         }
         return newMap;
     }
+
+    public static char[] toLowerCase(char[]source) {
+        char[] lowerChars = new char[source.length];
+        for (int i = 0, len = source.length; i < len; i++) {
+            lowerChars[i] = Character.toLowerCase(source[i]);
+        }
+        return lowerChars;
+    }
 }

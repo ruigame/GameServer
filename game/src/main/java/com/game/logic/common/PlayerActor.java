@@ -9,6 +9,7 @@ import com.game.logic.player.domain.PlayerStatus;
 import com.game.logic.player.domain.ResourceType;
 import com.game.logic.player.domain.Role;
 import com.game.logic.player.entity.PlayerEntity;
+import com.game.net.CloseCause;
 import com.game.net.LoginAuthParam;
 import com.game.net.packet.AbstractPacket;
 import com.game.thread.message.IMessage;
@@ -330,6 +331,12 @@ public class PlayerActor extends MessageHandler<PlayerActor> implements IPlayer<
 
     public void setStatus(PlayerStatus status) {
         this.status = status;
+    }
+
+    public void closeSession(CloseCause cause) {
+        if (this.session != null) {
+            this.session.close(cause);
+        }
     }
 
     /**

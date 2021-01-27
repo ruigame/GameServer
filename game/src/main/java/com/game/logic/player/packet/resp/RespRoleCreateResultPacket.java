@@ -20,6 +20,7 @@ public class RespRoleCreateResultPacket extends ResponsePacket {
     private static final byte INVALID_OVERFLOW = 5;  //玩家id超过上限
     private static final byte INVALID_SERVER_NOT_HOLDED = 6;  //服务器不存在
     private static final byte PLAYER_CREATE_LIMIT = 7;  //超过创角色限制
+    private static final byte NOT_GENDER = 8;  //没有该性别
 
     private int result = 0;
 
@@ -37,6 +38,14 @@ public class RespRoleCreateResultPacket extends ResponsePacket {
 
     public void fail4NameFormat() {
         result = FAILD_UNVALID_NAME_FORMAT;
+    }
+
+    public void fail4NotRoleType() {
+        result = INVALID_ROLETYPE;
+    }
+
+    public void fail4NotGender() {
+        result = NOT_GENDER;
     }
 
     public void fail4InvalidRoleType() {

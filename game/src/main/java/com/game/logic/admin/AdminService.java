@@ -2,19 +2,27 @@ package com.game.logic.admin;
 
 import com.game.PacketId;
 import com.game.base.GameSessionHelper;
+import com.game.logic.admin.packet.req.ReqAdminKickByIdPacket;
 import com.game.logic.admin.packet.req.ReqAdminTestPacket;
 import com.game.logic.admin.packet.resp.RespResultPacket;
-import com.game.util.GameSession;
+import com.game.logic.common.ConfigService;
+import com.game.logic.common.PlayerActor;
+import com.game.logic.player.BaseService;
+import com.game.logic.player.PlayerService;
+import com.game.net.CloseCause;
 import com.game.net.packet.AbstractPacket;
 import com.game.net.packet.PacketFactory;
 import com.game.net.packet.PacketHandlerWrapper;
+import com.game.thread.message.IMessage;
 import com.game.util.*;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -24,6 +32,7 @@ import java.util.concurrent.TimeUnit;
  * @Author: liguorui
  * @Date: 2020/12/4 下午2:40
  */
+@Component
 public class AdminService implements IAdminService, ServerStarter {
 
     private Logger log = LoggerFactory.getLogger("AdminLogger");
@@ -53,12 +62,11 @@ public class AdminService implements IAdminService, ServerStarter {
                     e.printStackTrace();
                     Throwable cause = e.getCause();
                     if (cause != null) {
-//                        ExceptionUtils.log("packet:{},[{}]", packet.getCmd(), Classutils.printlnAllfields(packet), cause);
+                        ExceptionUtils.log("packet:{}", packet.getCmd(), cause);
                     } else {
-//                        ExceptionUtils.log("packet:{},[{}]", packet.getCmd(), Classutils.printlnAllfields(packet), e);
+                        ExceptionUtils.log("packet:{}", packet.getCmd(), e);
                     }
                 }
-
             }
         });
     }
@@ -80,6 +88,24 @@ public class AdminService implements IAdminService, ServerStarter {
     @Override
     public void reqAdminTest(GameSession session, ReqAdminTestPacket req) {
         sendSuccess(session);
+    }
+
+    @Override
+    public void reqAdminKickPlayerByAccount(GameSession session, ReqAdminKickByIdPacket req) {
+        Set<String> accounts = req.getAccounts();
+        int server = Context.getBean(ConfigService.class).getOriServerId();
+        for (String account : accounts) {
+            String key = account + "_" + server;
+            PlayerActor playerActor = Context.getBean(PlayerService.class).getPlayerByASKey(key);
+            if (playerActor == null) continue;
+            playerActor.addMessage(new IMessage<PlayerActor>() {
+                @Override
+                public void execute(PlayerActor playerActor) {
+                    Context.getBean(BaseService.class).invalidatePlayerConnectInfo(account, server);
+                    playerActor.closeSession(CloseCause.KICK);
+                }
+            });
+        }
     }
 
     @Override

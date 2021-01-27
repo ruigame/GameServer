@@ -72,7 +72,7 @@ public class PlayerService {
     /**
      * 是否还能创角
      */
-    private boolean checkThreadSafe = PropConfigStore.getPropConfig(ConfigPath.DEBUG_PROPERTIES).getBoolean("CHECK_THREAD_SAFE");
+    private boolean checkThreadSafe = PropConfigStore.getPropConfig(ConfigPath.Independent.DEBUG_PROPERTIES).getBoolean("CHECK_THREAD_SAFE");
 
     public PlayerEntity createPlayer(GameSession session, int serverId, String account, String name, RoleType roleType, Gender gender) {
         return createPlayer(session, serverId, account, name, roleType, gender, true);

@@ -1,6 +1,7 @@
 package com.game.net;
 
 /**
+ * 登陆参数
  * @Author: liguorui
  * @Date: 2020/9/20 8:47 下午
  */
@@ -27,14 +28,28 @@ public class LoginAuthParam {
     private int serverId;
 
     /**
-     * 参数
+     * 前端传递参数
      */
     private String param;
-
+    /**
+     * gameId，用于区分当前是那款游戏
+     */
     private String gid;
+    /**
+     * 平台id
+     */
     private String pid;
-    private String time;
+    /**
+     * 秒级时间戳
+     */
+    private int time;
+    /**
+     * 签名
+     */
     private String sign;
+    /**
+     * token
+     */
     private String token;
 
     @Override
@@ -108,11 +123,11 @@ public class LoginAuthParam {
         this.pid = pid;
     }
 
-    public String getTime() {
+    public int getTime() {
         return time;
     }
 
-    public void setTime(String time) {
+    public void setTime(int time) {
         this.time = time;
     }
 

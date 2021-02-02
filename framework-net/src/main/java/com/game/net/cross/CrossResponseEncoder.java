@@ -1,6 +1,6 @@
 package com.game.net.cross;
 
-import com.game.net.ChannelUtils;
+import com.game.util.ChannelUtils;
 import com.game.net.packet.ByteBufResponse;
 import com.game.net.packet.PacketFactory;
 import com.game.util.GameSession;

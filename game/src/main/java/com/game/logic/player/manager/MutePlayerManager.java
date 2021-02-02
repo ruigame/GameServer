@@ -1,6 +1,6 @@
 package com.game.logic.player.manager;
 
-import com.game.async.manager.CacheManager;
+import com.game.async.asyncdb.manager.CacheManager;
 import com.game.logic.common.PlayerActor;
 import com.game.logic.player.dao.MutePlayerDao;
 import com.game.logic.player.entity.MutePlayer;
@@ -9,11 +9,13 @@ import com.game.util.TimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @Author: liguorui
  * @Date: 2021/1/21 下午11:22
  */
+@Component
 public class MutePlayerManager extends CacheManager<Long, MutePlayer> implements PlayerLoginListener {
 
     private static final Logger log = LoggerFactory.getLogger(MutePlayerManager.class);

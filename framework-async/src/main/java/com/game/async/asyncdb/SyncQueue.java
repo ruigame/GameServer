@@ -2,6 +2,7 @@ package com.game.async.asyncdb;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedTransferQueue;
@@ -44,6 +45,7 @@ public class SyncQueue implements Runnable {
     /**
      * 同步策略
      */
+    @Autowired
     private ISyncStrategy syncStrategy;
 
     /**

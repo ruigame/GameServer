@@ -1,6 +1,6 @@
 package com.game.logic.player.domain;
 
-import com.game.net.LoginAuthParam;
+import com.game.util.LoginAuthParam;
 
 /**
  * @Author: liguorui

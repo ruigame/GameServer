@@ -9,7 +9,7 @@ import com.game.net.packet.ResponsePacket;
  * @Author: liguorui
  * @Date: 2020/12/4 下午1:17
  */
-@Packet(commandId = PacketId.Base.RESP_LOGIN_CONFLICT)
+@Packet(commandId = PacketId.Utils.RESP_LOGIN_CONFLICT)
 public class RespLoginConflictPacket extends ResponsePacket {
 
     /**

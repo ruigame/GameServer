@@ -1,7 +1,7 @@
 package com.game.logic.commdata.entity;
 
 import com.game.async.asyncdb.anotation.Persistent;
-import com.game.async.asyncdb.orm.BaseDBEntity;
+import com.game.async.asyncdb.BaseDBEntity;
 import com.game.logic.commdata.CommDataKey;
 import com.game.logic.commdata.NewCommDataMonitor;
 import com.game.logic.commdata.NewCommDataType;

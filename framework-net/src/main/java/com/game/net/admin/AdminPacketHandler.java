@@ -1,7 +1,7 @@
 package com.game.net.admin;
 
-import com.game.net.ChannelUtils;
-import com.game.net.CloseCause;
+import com.game.util.ChannelUtils;
+import com.game.util.CloseCause;
 import com.game.net.GameStartParams;
 import com.game.net.packet.AbstractPacket;
 import com.game.net.packet.AdminPacket;

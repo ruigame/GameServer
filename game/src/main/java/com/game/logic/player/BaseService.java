@@ -1,15 +1,15 @@
 package com.game.logic.player;
 
 import com.game.PacketId;
-import com.game.base.GameSessionHelper;
-import com.game.base.ListenerHandler;
-import com.game.base.PacketUtils;
-import com.game.base.exception.PlayerIdOverflowException;
-import com.game.base.exception.ServerNotHoldedException;
+import com.game.framework.GameSessionHelper;
+import com.game.framework.ListenerHandler;
+import com.game.framework.PacketUtils;
+import com.game.framework.exception.PlayerIdOverflowException;
+import com.game.framework.exception.ServerNotHoldedException;
 import com.game.logic.common.*;
 import com.game.logic.common.manger.ConfigRandomNameManger;
 import com.game.logic.common.packet.req.ReqMessageVersionPacket;
-import com.game.logic.common.packet.resp.RespMessageVersion;
+import com.game.logic.common.packet.resp.RespMessageVersionPacket;
 import com.game.logic.player.domain.ConnectInfo;
 import com.game.logic.player.domain.Gender;
 import com.game.logic.player.domain.RoleType;
@@ -18,9 +18,10 @@ import com.game.logic.player.log.CreatePlayerLogEvent;
 import com.game.logic.player.log.RegisterLogEvent;
 import com.game.logic.player.packet.req.*;
 import com.game.logic.player.packet.resp.*;
-import com.game.net.ChannelUtils;
-import com.game.net.CloseCause;
-import com.game.net.LoginAuthParam;
+import com.game.util.ChannelUtils;
+import com.game.util.CloseCause;
+import com.game.util.GameSession;
+import com.game.util.LoginAuthParam;
 import com.game.net.packet.PacketFactory;
 import com.game.thread.gate.GateKeeper;
 import com.game.thread.message.IMessage;
@@ -79,7 +80,7 @@ public class BaseService implements IBaseService, ServerStarter{
 
     @Override
     public void reqMessageVersion(GameSession session, ReqMessageVersionPacket req) {
-        GameSessionHelper.sendPacket(session, RespMessageVersion.create(messageVersion));
+        GameSessionHelper.sendPacket(session, RespMessageVersionPacket.create(messageVersion));
     }
 
     @Override

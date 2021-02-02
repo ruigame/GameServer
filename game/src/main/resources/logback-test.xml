@@ -13,24 +13,23 @@
     <!-- core appender -->
     <appender name="stdoutAppender" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <charset>UTF-8</charset>
             <pattern>%level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%logger{50}] - %msg%n%ex </pattern>
         </encoder>
     </appender>
 
     <!-- game appender -->
 
-    <appender name="uploadAppender" class="com.game.log.logback.SJBLogbackAppender">
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>ERROR</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
-    </appender>
+<!--    <appender name="uploadAppender" class="com.game.log.logback.SJBLogbackAppender">-->
+<!--        <filter class="ch.qos.logback.classic.filter.LevelFilter">-->
+<!--            <level>ERROR</level>-->
+<!--            <onMatch>ACCEPT</onMatch>-->
+<!--            <onMismatch>DENY</onMismatch>-->
+<!--        </filter>-->
+<!--    </appender>-->
 
-    <appender name="uploadAsyncAppender" class="ch.qos.logback.classic.AsyncAppender">
-        <appender-ref ref="uploadAppender"/>
-    </appender>
+<!--    <appender name="uploadAsyncAppender" class="ch.qos.logback.classic.AsyncAppender">-->
+<!--        <appender-ref ref="uploadAppender"/>-->
+<!--    </appender>-->
 
 
     <appender name="asyncProfile"  class="com.game.log.logback.AsyncDailyFileAppender">
@@ -165,7 +164,7 @@
         <appender-ref ref="stdoutAppender"/>
     </logger>
 
-    <logger name="com.game.net" level="info" additivity="false">
+    <logger name="com.game.net" level="debug" additivity="false">
         <appender-ref ref="asyncNetworkAppender"/>
         <appender-ref ref="stdoutAppender"/>
     </logger>
@@ -193,7 +192,7 @@
     <logger name="com.game.util.ExceptionUtils" level="warn" additivity="false">
         <appender-ref ref="exceptionAsyncAppender"/>
         <appender-ref ref="stdoutAppender"/>
-        <appender-ref ref="uploadAsyncAppender"/>
+<!--        <appender-ref ref="uploadAsyncAppender"/>-->
     </logger>
 
     <logger name="UseTimerLogger" level="warn" additivity="false">
@@ -204,7 +203,7 @@
     <root level="debug">
         <appender-ref ref="stdoutAppender"/>
         <appender-ref ref="exceptionAsyncAppender"/>
-        <appender-ref ref="uploadAsyncAppender"/>
+<!--        <appender-ref ref="uploadAsyncAppender"/>-->
     </root>
 
 </configuration>

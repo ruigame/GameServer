@@ -1,5 +1,6 @@
 package com.game.async.asynchttp;
 
+import com.game.util.HttpUtils;
 import com.game.util.SimpleThreadFactory;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.http.HttpHost;

@@ -21,9 +21,9 @@ public class SJBLogbackAppender extends UnsynchronizedAppenderBase<ILoggingEvent
     @Override
     public void start() {
         try {
-            Class<?> logClass = Class.forName("com.xiaosan.profiler.log.LogCollector");
-            collectMethod = logClass.getDeclaredMethod("collect", String.class, String.class, String.class);
-            shutdownMethod = logClass.getDeclaredMethod("shutdown");
+//            Class<?> logClass = Class.forName("com.xiaosan.profiler.log.LogCollector");
+//            collectMethod = logClass.getDeclaredMethod("collect", String.class, String.class, String.class);
+//            shutdownMethod = logClass.getDeclaredMethod("shutdown");
             this.throwableProxyConverter = new ThrowableProxyConverter();
             throwableProxyConverter.start();
             super.start();

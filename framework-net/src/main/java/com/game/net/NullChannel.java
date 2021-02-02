@@ -241,6 +241,11 @@ public class NullChannel extends AbstractChannel {
         }
 
         @Override
+        public EventLoopGroup parent() {
+            return this;
+        }
+
+        @Override
         public void shutdown() {
             throw new UnsupportedOperationException();
         }

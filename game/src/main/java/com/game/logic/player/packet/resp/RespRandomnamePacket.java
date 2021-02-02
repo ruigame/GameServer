@@ -22,4 +22,8 @@ public class RespRandomnamePacket extends ResponsePacket {
     protected void doResponse(Response response) {
         response.writeString(name);
     }
+
+    public String getName() {
+        return name;
+    }
 }

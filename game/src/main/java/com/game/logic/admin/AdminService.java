@@ -1,7 +1,8 @@
 package com.game.logic.admin;
 
 import com.game.PacketId;
-import com.game.base.GameSessionHelper;
+import com.game.framework.GameSessionHelper;
+import com.game.util.Context;
 import com.game.logic.admin.packet.req.ReqAdminKickByIdPacket;
 import com.game.logic.admin.packet.req.ReqAdminTestPacket;
 import com.game.logic.admin.packet.resp.RespResultPacket;
@@ -9,7 +10,8 @@ import com.game.logic.common.ConfigService;
 import com.game.logic.common.PlayerActor;
 import com.game.logic.player.BaseService;
 import com.game.logic.player.PlayerService;
-import com.game.net.CloseCause;
+import com.game.util.CloseCause;
+import com.game.util.GameSession;
 import com.game.net.packet.AbstractPacket;
 import com.game.net.packet.PacketFactory;
 import com.game.net.packet.PacketHandlerWrapper;

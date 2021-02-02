@@ -1,7 +1,7 @@
 package com.game.logic.guild.entity;
 
 import com.game.async.asyncdb.anotation.Persistent;
-import com.game.async.asyncdb.orm.BaseDBEntity;
+import com.game.async.asyncdb.BaseDBEntity;
 import com.game.logic.guild.dao.GuildDAO;
 import com.google.common.collect.Sets;
 

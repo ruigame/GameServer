@@ -11,7 +11,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface Packet {
 
-    short[] commandId();
+    short commandId();
 
     int checkTimes() default 220;
 

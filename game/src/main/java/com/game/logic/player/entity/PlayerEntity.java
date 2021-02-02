@@ -1,15 +1,15 @@
 package com.game.logic.player.entity;
 
 import com.game.async.asyncdb.anotation.Persistent;
-import com.game.async.asyncdb.orm.BaseDBEntity;
-import com.game.async.asynchttp.HttpUtils;
-import com.game.base.TypeReference;
+import com.game.async.asyncdb.BaseDBEntity;
+import com.game.util.HttpUtils;
+import com.game.framework.TypeReference;
 import com.game.logic.common.OnlineService;
 import com.game.logic.common.PlayerActor;
 import com.game.logic.player.dao.PlayerEntityDao;
 import com.game.logic.player.domain.*;
 import com.game.util.Context;
-import com.game.base.JSONUtils;
+import com.game.framework.JSONUtils;
 import com.game.util.ExceptionUtils;
 import com.game.util.TimeUtils;
 import com.google.common.collect.Lists;

@@ -1,7 +1,7 @@
 package com.game.logic.player.domain;
 
-import com.game.base.JSONUtils;
-import com.game.base.TypeReference;
+import com.game.framework.JSONUtils;
+import com.game.framework.TypeReference;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 

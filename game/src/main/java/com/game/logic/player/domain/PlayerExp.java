@@ -1,7 +1,9 @@
 package com.game.logic.player.domain;
 
+import com.game.framework.PacketUtils;
 import com.game.logic.common.PlayerActor;
 import com.game.logic.player.entity.PlayerEntity;
+import com.game.logic.player.log.PlayerLevelChangeLogEvent;
 import com.google.common.base.Preconditions;
 
 /**
@@ -39,10 +41,18 @@ public class PlayerExp {
         }
         Preconditions.checkArgument(value > 0, "Exp value negative! %s", value);
         if (!this.isMaxLevel()) {
-
+            this.alterExp0(value, opType);
+            this.getPlayerEntity().update();
+            PacketUtils.sendExpPacket(playerActor, value);
         }
+        return value;
     }
 
+    /**
+     * 降级操作
+     * @param alterExp
+     * @param opType
+     */
     public void deductLevel(long alterExp, OperationType opType) {
         int oldLevel = playerActor.getLevel();
         int newLevel = oldLevel - 1;
@@ -96,11 +106,67 @@ public class PlayerExp {
 
             alter -= eachAlter;
             exp += eachAlter;
-            if (exp == getMaxpExp())
+            if (exp == getMaxExp()) {
+                getPlayerEntity().alterLevel(1);
+                if (isMaxLevel()) {
+                    setExp(0);
+                } else {
+                    exp = 0;
+                    setExp(exp);
+                }
+            } else {
+                setExp(exp);
+            }
         }
+
+        afterLevelChanged(oldLevel, playerActor.getLevel(), opType);
+//        ListenerHandler.getInstance().firePlayerExpChanged(playerActor, gainExp, opType);
     }
 
     public void setExp(long exp) {
         getPlayerEntity().changeExp(exp);
+    }
+
+    public void alterExp(long alter, OperationType operationType) {
+        alterExp(alter, operationType, false);
+    }
+
+    /**
+     * 修改玩家经验，并通知前端
+     * @param alter 变化的经验
+     * @param operationType
+     * @param isLevelDown 是否因为降级
+     */
+    public void alterExp(long alter, OperationType operationType, boolean isLevelDown) {
+        getPlayerEntity().alterExp(alter);
+        PacketUtils.sendExpPacket(playerActor, isLevelDown ? 0 : alter);
+//        ListenerHandler.getInstance().firePlayerExpChanged(playerActor, alter, operationType);
+    }
+
+    public boolean afterLevelChanged(int oldLevel, int newLevel, OperationType oType) {
+        if (oldLevel == newLevel) {
+            return false;
+        }
+//        playerActor.calculateFightAttr(FightingType.level);
+        PacketUtils.sendLevel(playerActor);
+//        ListenerHandler.getInstance().firePlayerLevelChangedListener(playerActor, oldlevel, newLevel, oType);
+        new PlayerLevelChangeLogEvent(playerActor, oldLevel, oType).post();
+        return true;
+    }
+
+    public boolean isMaxLevel() {
+        return playerActor.getLevel() >= 150;
+    }
+
+    public long getMaxExp() {
+        return 100000000;
+    }
+
+    public PlayerActor getPlayerActor() {
+        return playerActor;
+    }
+
+    public void setPlayerActor(PlayerActor playerActor) {
+        this.playerActor = playerActor;
     }
 }

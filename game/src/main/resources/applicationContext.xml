@@ -4,21 +4,13 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-       http://www.springframework.org/schema/aop
-       http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
-       http://www.springframework.org/schema/tx
-       http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
        http://www.springframework.org/schema/context
        http://www.springframework.org/schema/context/spring-context-2.5.xsd
-       http://www.springframework.org/schema/task
-       http://www.springframework.org/schema/task/spring-task-3.0.xsd
-       http://www.springframework.org/schema/lang
-       http://www.springframework.org/schema/lang/spring-lang-3.1.xsd
         ">
 
     <bean id="context" class="com.game.util.Context"/>
 
-    <context:component-scan base-package="com.game,com.game.util">
+    <context:component-scan base-package="com.game.*,com.game.util">
         <context:include-filter type="annotation" expression="com.game.net.packet.Packet"/>
         <context:include-filter type="annotation" expression="com.game.util.Listener"/>
     </context:component-scan>

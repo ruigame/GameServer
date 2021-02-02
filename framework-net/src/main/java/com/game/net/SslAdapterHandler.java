@@ -32,14 +32,16 @@ public class SslAdapterHandler extends ChannelInboundHandlerAdapter {
 
     static {
         try {
-            PropConfig netConfig = PropConfigStore.getPropConfig("/independent/ssl.properties");
+            PropConfig netConfig = PropConfigStore.getPropConfig("independent/ssl.properties");
             boolean isSSL = netConfig.getBoolean("SSL");
-            LOGGER.info("ssl_enable={}", isSSL);
+            String cert = netConfig.getStr("CERT");
+            String certKey = netConfig.getStr("CERT_KEY");
+            LOGGER.info("ssl_enable={},CERT={},CERT_KEY={}", isSSL, cert, certKey);
             if (isSSL) {
-                LOGGER.info("cert_path={}", netConfig.getStr("CERT"));
-                LOGGER.info("cert_key_path={}", netConfig.getStr("CERT_KEY"));
-                File certFile = new File(netConfig.getStr("CERT"));
-                File keyFile = new File(netConfig.getStr("CERT_KEY"));
+                LOGGER.info("cert_path={}", cert);
+                LOGGER.info("cert_key_path={}", certKey);
+                File certFile = new File(cert);
+                File keyFile = new File(certKey);
                 sslContext = SslContextBuilder.forServer(certFile, keyFile).build();
             } else {
                 sslContext = null;

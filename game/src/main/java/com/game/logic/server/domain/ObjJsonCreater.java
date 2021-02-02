@@ -1,6 +1,6 @@
 package com.game.logic.server.domain;
 
-import com.game.base.JSONUtils;
+import com.game.framework.JSONUtils;
 import org.apache.commons.lang.StringUtils;
 
 /**

@@ -1,5 +1,6 @@
 package com.game.async.asyncdb.orm;//package com.game.framework.asyncdb.orm;
 
+import com.game.async.asyncdb.BaseDBEntity;
 import com.game.util.ExceptionUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;

@@ -188,6 +188,6 @@ public interface PacketId {
         /**
          * 跨服PING
          */
-        short CROSS_PING = 1;
+        short CROSS_PING = 9999;
     }
 }

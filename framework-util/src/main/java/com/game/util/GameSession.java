@@ -1,9 +1,5 @@
 package com.game.util;
 
-import com.game.async.asynchttp.HttpUtils;
-import com.game.net.ChannelUtils;
-import com.game.net.CloseCause;
-import com.game.net.LoginAuthParam;
 import com.google.common.collect.Maps;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;

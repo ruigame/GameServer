@@ -9,17 +9,17 @@
 <configuration scan="true" scanPeriod="30 seconds">
 
     <!--上传 appender -->
-    <appender name = "uploadAppender" class="com.game.log.logback.SJBLogbackAppender">
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>ERROR</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
-    </appender>
+<!--    <appender name = "uploadAppender" class="com.game.log.logback.SJBLogbackAppender">-->
+<!--        <filter class="ch.qos.logback.classic.filter.LevelFilter">-->
+<!--            <level>ERROR</level>-->
+<!--            <onMatch>ACCEPT</onMatch>-->
+<!--            <onMismatch>DENY</onMismatch>-->
+<!--        </filter>-->
+<!--    </appender>-->
 
-    <appender name="uploadAsyncAppender" class="ch.qos.logback.classic.AsyncAppender">
-        <appender-ref ref="uploadAppender"/>
-    </appender>
+<!--    <appender name="uploadAsyncAppender" class="ch.qos.logback.classic.AsyncAppender">-->
+<!--        <appender-ref ref="uploadAppender"/>-->
+<!--    </appender>-->
 
     <!-- core appender -->
     <appender name="asyncRoot" class="com.game.log.logback.AsyncDailyFileAppender">
@@ -72,7 +72,7 @@
 
     <logger name="com.game.util.ExceptionUtils" level="warn" additivity="false">
         <appender-ref ref="exceptionAsyncAppender"/>
-        <appender-ref ref="uploadAsyncAppender"/>
+<!--        <appender-ref ref="uploadAsyncAppender"/>-->
     </logger>
 
     <appender name="asyncAsyndb"  class="com.game.log.logback.AsyncDailyFileAppender">
@@ -155,7 +155,7 @@
     <root level="info">
         <appender-ref ref="asyncRoot"/>
         <appender-ref ref="exceptionAsyncAppender"/>
-        <appender-ref ref="uploadAsyncAppender"/>
+<!--        <appender-ref ref="uploadAsyncAppender"/>-->
     </root>
 
 </configuration>

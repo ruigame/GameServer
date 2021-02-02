@@ -82,7 +82,7 @@ public class LogEventHandler implements ICloseEvent {
         LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
         DailyFileAppender<ILoggingEvent> dailyFileAppender = new DailyFileAppender<>();
         dailyFileAppender.setContext(lc);
-        dailyFileAppender.setName(logEvent.getAppenderName());
+        dailyFileAppender.setName(logEvent.getLoggerName());
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(lc);
         encoder.setPattern("%m%n");

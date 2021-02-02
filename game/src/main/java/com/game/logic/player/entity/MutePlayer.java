@@ -1,7 +1,7 @@
 package com.game.logic.player.entity;
 
 import com.game.async.asyncdb.anotation.Persistent;
-import com.game.async.asyncdb.orm.BaseDBEntity;
+import com.game.async.asyncdb.BaseDBEntity;
 import com.game.logic.player.dao.MutePlayerDao;
 import com.game.util.TimeUtils;
 

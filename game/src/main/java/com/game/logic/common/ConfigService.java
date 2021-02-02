@@ -1,6 +1,7 @@
 package com.game.logic.common;
 
-import com.game.base.Platform;
+import com.game.async.asyncdb.AsyncDBService;
+import com.game.framework.Platform;
 import com.game.file.ConfigPath;
 import com.game.file.prop.PropConfig;
 import com.game.file.prop.PropConfigListener;
@@ -48,6 +49,8 @@ public class ConfigService implements PlayerCreateListener {
 
     @Autowired
     private UUIDService uuidService;
+    @Autowired
+    private AsyncDBService asyncDBService;
 
     /**
      * 初始的服务器ID
@@ -277,13 +280,13 @@ public class ConfigService implements PlayerCreateListener {
         this.heartbeatCheatDur = propConfig.getInt("HEARTBEAT_CHEAT_DUR");
         this.cheatHoldTime = propConfig.getInt("CHEAT_HOLD_TIME");
         this.kickOffCheatTime = propConfig.getInt("KICK_OFF_CHEAT_TIME");
-        this.kickOffCheatTimeDur = propConfig.getInt("KICK_OFF_CHEAT_TIME_DUR");
+        this.kickOffCheatTimeDur = propConfig.getInt("KICK_OFF_CHEAT_DUR");
         this.singleCheatHeartbeatDiff = propConfig.getInt("SINGLE_CHEAT_HEARTBEAT_DIFF");
         this.prisonOutTime = propConfig.getInt("PRISON_OUT_TIME");
     }
 
     private void initProps() {
-        PropConfig debug = PropConfigStore.getPropConfig(ConfigPath.DEBUG_PROPERTIES);
+        PropConfig debug = PropConfigStore.getPropConfig(ConfigPath.Independent.DEBUG_PROPERTIES);
         initDebug(debug);
         debug.addListener(new PropConfigListener() {
             @Override
@@ -292,7 +295,7 @@ public class ConfigService implements PlayerCreateListener {
             }
         });
 
-        PropConfig gm = PropConfigStore.getPropConfig(ConfigPath.GM_PROPERTIES);
+        PropConfig gm = PropConfigStore.getPropConfig(ConfigPath.Independent.GM_PROPERTIES);
         initGM(gm);
         gm.addListener(new PropConfigListener() {
             @Override
@@ -301,7 +304,7 @@ public class ConfigService implements PlayerCreateListener {
             }
         });
 
-        PropConfig auth = PropConfigStore.getPropConfig(ConfigPath.AUTH_PROPERTIES);
+        PropConfig auth = PropConfigStore.getPropConfig(ConfigPath.Independent.AUTH_PROPERTIES);
         initAuth(auth);
         auth.addListener(new PropConfigListener() {
             @Override
@@ -310,7 +313,7 @@ public class ConfigService implements PlayerCreateListener {
             }
         });
 
-        PropConfig net = PropConfigStore.getPropConfig(ConfigPath.NET_PROPERTIES);
+        PropConfig net = PropConfigStore.getPropConfig(ConfigPath.Independent.NET_PROPERTIES);
         initNet(net);
         net.addListener(new PropConfigListener() {
             @Override
@@ -319,7 +322,7 @@ public class ConfigService implements PlayerCreateListener {
             }
         });
 
-        PropConfig server = PropConfigStore.getPropConfig(ConfigPath.SERVER_PROPERTIES);
+        PropConfig server = PropConfigStore.getPropConfig(ConfigPath.Independent.SERVER_PROPERTIES);
         initServer(server);
         server.addListener(new PropConfigListener() {
             @Override
@@ -328,7 +331,7 @@ public class ConfigService implements PlayerCreateListener {
             }
         });
 
-        PropConfig scene = PropConfigStore.getPropConfig(ConfigPath.SCENE_PROPERTIES);
+        PropConfig scene = PropConfigStore.getPropConfig(ConfigPath.Common.SCENE_PROPERTIES);
         initScene(scene);
         scene.addListener(new PropConfigListener() {
             @Override
@@ -337,7 +340,7 @@ public class ConfigService implements PlayerCreateListener {
             }
         });
 
-        PropConfig misc = PropConfigStore.getPropConfig(ConfigPath.MISC_PROPERTIES);
+        PropConfig misc = PropConfigStore.getPropConfig(ConfigPath.Common.MISC_PROPERTIES);
         initMISC(misc);
         misc.addListener(new PropConfigListener() {
             @Override
@@ -346,7 +349,7 @@ public class ConfigService implements PlayerCreateListener {
             }
         });
 
-        PropConfig wl = PropConfigStore.getPropConfig(ConfigPath.WHITELIST_PROPERTIES);
+        PropConfig wl = PropConfigStore.getPropConfig(ConfigPath.Independent.WHITELIST_PROPERTIES);
         initWhiteList(wl);
         wl.addListener(new PropConfigListener() {
             @Override
@@ -355,7 +358,7 @@ public class ConfigService implements PlayerCreateListener {
             }
         });
 
-        PropConfig plug = PropConfigStore.getPropConfig(ConfigPath.PLUG_PROPERTIES);
+        PropConfig plug = PropConfigStore.getPropConfig(ConfigPath.Common.PLUG_PROPERTIES);
         initPlus(plug);
         plug.addListener(new PropConfigListener() {
             @Override
@@ -364,7 +367,7 @@ public class ConfigService implements PlayerCreateListener {
             }
         });
 
-        PropConfig cheat = PropConfigStore.getPropConfig(ConfigPath.CHEAT);
+        PropConfig cheat = PropConfigStore.getPropConfig(ConfigPath.Common.CHEAT);
         initCheat(cheat);
         cheat.addListener(new PropConfigListener() {
             @Override
@@ -373,7 +376,7 @@ public class ConfigService implements PlayerCreateListener {
             }
         });
 
-        PropConfig ipLimit = PropConfigStore.getPropConfig(ConfigPath.IP_LIMIT);
+        PropConfig ipLimit = PropConfigStore.getPropConfig(ConfigPath.Independent.IP_LIMIT);
         initIpLimit(ipLimit);
         ipLimit.addListener(new PropConfigListener() {
             @Override

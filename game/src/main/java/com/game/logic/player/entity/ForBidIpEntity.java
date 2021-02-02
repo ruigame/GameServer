@@ -1,7 +1,7 @@
 package com.game.logic.player.entity;
 
 import com.game.async.asyncdb.anotation.Persistent;
-import com.game.async.asyncdb.orm.BaseDBEntity;
+import com.game.async.asyncdb.BaseDBEntity;
 import com.game.logic.player.dao.ForbidIpEntityDao;
 import com.game.logic.player.domain.forbid.ForbidIpDataKey;
 
@@ -18,7 +18,7 @@ import javax.persistence.*;
 @IdClass(ForbidIpDataKey.class)
 public class ForBidIpEntity extends BaseDBEntity {
 
-    @Column(columnDefinition = "varchar(30", nullable = false, updatable = false)
+    @Column(columnDefinition = "varchar(30)", nullable = false, updatable = false)
     @Id
     private String ip;
 
@@ -29,7 +29,7 @@ public class ForBidIpEntity extends BaseDBEntity {
 
     private int limitTime;
 
-    @Column(columnDefinition = "varchar(500")
+    @Column(columnDefinition = "varchar(500)")
     private String reason;
 
     public ForBidIpEntity() {
@@ -109,4 +109,5 @@ public class ForBidIpEntity extends BaseDBEntity {
     public void setReason(String reason) {
         this.reason = reason;
     }
+
 }

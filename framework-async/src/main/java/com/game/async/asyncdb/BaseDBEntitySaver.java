@@ -1,7 +1,5 @@
 package com.game.async.asyncdb;
 
-import com.game.async.asyncdb.orm.BaseDBEntity;
-
 /**
  * @Author: liguorui
  * @Date: 2020/9/19 6:44 下午

@@ -90,7 +90,6 @@ public class AsyncDailyFileAppender extends DailyFileAppender<ILoggingEvent> {
                     LogTask logTask = blockingQueue.take();
                     logTask.dailyFileAppender.subAppend(logTask.event);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
                     break;
                 }
             }

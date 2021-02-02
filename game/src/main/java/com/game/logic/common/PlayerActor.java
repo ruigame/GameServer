@@ -1,16 +1,14 @@
 package com.game.logic.common;
 
-import com.game.base.IPlayer;
-import com.game.base.handler.PacketMessage;
+import com.game.framework.IPlayer;
+import com.game.framework.handler.PacketMessage;
+import com.game.logic.commdata.domain.PlayerNewCommData;
 import com.game.logic.guild.entity.Guild;
 import com.game.logic.guild.manager.GuildManager;
-import com.game.logic.player.domain.PlayerResourceType;
-import com.game.logic.player.domain.PlayerStatus;
-import com.game.logic.player.domain.ResourceType;
-import com.game.logic.player.domain.Role;
+import com.game.logic.player.domain.*;
 import com.game.logic.player.entity.PlayerEntity;
-import com.game.net.CloseCause;
-import com.game.net.LoginAuthParam;
+import com.game.util.CloseCause;
+import com.game.util.LoginAuthParam;
 import com.game.net.packet.AbstractPacket;
 import com.game.thread.message.IMessage;
 import com.game.thread.message.MessageHandler;
@@ -62,6 +60,12 @@ public class PlayerActor extends MessageHandler<PlayerActor> implements IPlayer<
      * 玩家状态
      */
     private PlayerStatus status;
+
+    /**
+     * 玩家经验
+     */
+    private PlayerExp playerExp;
+    private PlayerNewCommData newCommData;
 
     public PlayerActor(PlayerEntity playerEntity) {
         this.playerEntity = playerEntity;
@@ -301,6 +305,10 @@ public class PlayerActor extends MessageHandler<PlayerActor> implements IPlayer<
         return guild != null ? guild.getName() : null;
     }
 
+    public PlayerExp getPlayerExp() {
+        return playerExp;
+    }
+
     public void setPlayerId(long playerId) {
         this.playerId = playerId;
     }
@@ -331,6 +339,14 @@ public class PlayerActor extends MessageHandler<PlayerActor> implements IPlayer<
 
     public void setStatus(PlayerStatus status) {
         this.status = status;
+    }
+
+    public PlayerNewCommData getNewCommData() {
+        return newCommData;
+    }
+
+    public void setNewCommData(PlayerNewCommData newCommData) {
+        this.newCommData = newCommData;
     }
 
     public void closeSession(CloseCause cause) {

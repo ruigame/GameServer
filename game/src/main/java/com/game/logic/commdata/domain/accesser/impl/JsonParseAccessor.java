@@ -5,7 +5,7 @@ import com.game.logic.commdata.PlayerCommObj;
 import com.game.logic.commdata.domain.accesser.DataWrapper;
 import com.game.logic.commdata.domain.accesser.IObjectDataAccessor;
 import com.game.logic.commdata.entity.NewCommData;
-import com.game.base.TypeReference;
+import com.game.framework.TypeReference;
 
 /**
  * @author liguorui

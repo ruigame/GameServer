@@ -42,7 +42,7 @@ public class ServerService implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        PropConfig propConfig = PropConfigStore.getPropConfig(ConfigPath.SERVER_PROPERTIES);
+        PropConfig propConfig = PropConfigStore.getPropConfig(ConfigPath.Independent.SERVER_PROPERTIES);
         oriServerFlag = propConfig.getStr("ORI_SERVER_FLAG");
         oriServerId = propConfig.getInt("ORI_SERVER_ID");
         platformId = propConfig.getInt("PLATFORM_ID");

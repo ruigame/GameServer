@@ -1,7 +1,7 @@
 package com.game.logic.common;
 
-import com.game.base.exception.PlayerIdOverflowException;
-import com.game.base.exception.ServerNotHoldedException;
+import com.game.framework.exception.PlayerIdOverflowException;
+import com.game.framework.exception.ServerNotHoldedException;
 import com.game.logic.guild.manager.GuildManager;
 import com.game.logic.player.dao.PlayerEntityDao;
 import org.springframework.beans.factory.annotation.Autowired;

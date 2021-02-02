@@ -47,6 +47,7 @@ public class TriggerTaskExecutor extends AbstractTriggerTaskExecutor {
                             if (!trigger.isCanceled() && !trigger.isFinish()) {
                                 taskDelayQueue.add(trigger);
                             }
+                        } catch (InterruptedException e1) {
                         } catch (Exception e) {
                             ExceptionUtils.log(e);
                         }

@@ -1,7 +1,7 @@
 package com.game.logic.player.packet.req;
 
 import com.game.PacketId;
-import com.game.net.LoginAuthParam;
+import com.game.util.LoginAuthParam;
 import com.game.net.packet.Packet;
 import com.game.net.packet.Request;
 import com.game.net.packet.RequestBeforeLoginPacket;
@@ -20,10 +20,10 @@ public class ReqLoginAuthPacket extends RequestBeforeLoginPacket {
         String platform = request.readString();
         int serverId = request.readInt();
         String account = request.readString();
-
+        String server = request.readString();
         String gid = request.readString();
         String pid = request.readString();
-        String time = request.readString();
+        int time = request.readInt();
         String sign = request.readString();
         String token = request.readString();
         String param = request.readString();
@@ -31,7 +31,8 @@ public class ReqLoginAuthPacket extends RequestBeforeLoginPacket {
         LoginAuthParam loginAuthParam = new LoginAuthParam();
         loginAuthParam.setPlatform(platform);
         loginAuthParam.setAccount(account);
-        loginAuthParam.setServer(serverId);
+        loginAuthParam.setServer(server);
+        loginAuthParam.setServerId(serverId);
         loginAuthParam.setGid(gid);
         loginAuthParam.setPid(pid);
         loginAuthParam.setTime(time);

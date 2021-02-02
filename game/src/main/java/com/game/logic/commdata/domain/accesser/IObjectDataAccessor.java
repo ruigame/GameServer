@@ -1,7 +1,7 @@
 package com.game.logic.commdata.domain.accesser;
 
 import com.game.logic.commdata.PlayerCommObj;
-import com.game.base.TypeReference;
+import com.game.framework.TypeReference;
 
 /**
  * @author liguorui

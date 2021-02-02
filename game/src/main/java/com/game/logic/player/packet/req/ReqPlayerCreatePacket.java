@@ -45,4 +45,16 @@ public class ReqPlayerCreatePacket extends RequestBeforeLoginPacket {
     public byte getGender() {
         return gender;
     }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public void setRoleType(byte roleType) {
+        this.roleType = roleType;
+    }
+
+    public void setGender(byte gender) {
+        this.gender = gender;
+    }
 }

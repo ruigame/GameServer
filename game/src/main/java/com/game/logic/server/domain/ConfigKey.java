@@ -14,6 +14,10 @@ public enum  ConfigKey {
         public String toString() {
             return "openServerTime";
         }
+        @Override
+        public String getDefaultValue() {
+            return "0";
+        }
     },
 
     /**
@@ -43,6 +47,10 @@ public enum  ConfigKey {
         @Override
         public String toString() {
             return "combineTime";
+        }
+        @Override
+        public String getDefaultValue() {
+            return "0";
         }
     },
 

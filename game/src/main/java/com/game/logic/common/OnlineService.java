@@ -1,16 +1,16 @@
 package com.game.logic.common;
 
 import com.game.PacketId;
-import com.game.base.GameSessionHelper;
-import com.game.base.ListenerHandler;
-import com.game.base.PacketUtils;
+import com.game.framework.GameSessionHelper;
+import com.game.framework.ListenerHandler;
+import com.game.framework.PacketUtils;
 import com.game.logic.RespLoginConflictPacket;
 import com.game.logic.common.domain.IPlayerFilter;
 import com.game.logic.desc.packet.resp.RespMessagePacket;
 import com.game.logic.player.BaseService;
 import com.game.logic.player.PlayerService;
 import com.game.logic.player.domain.IPlayerId;
-import com.game.net.CloseCause;
+import com.game.util.CloseCause;
 import com.game.net.packet.AbstractPacket;
 import com.game.net.packet.PacketFactory;
 import com.game.net.packet.Response;

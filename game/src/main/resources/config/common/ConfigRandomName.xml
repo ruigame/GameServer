@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<list>
+    <model>
+        <nameId>1</nameId>
+        <name>李</name>
+        <type>1</type>
+    </model>
+    <model>
+        <nameId>2</nameId>
+        <name>张</name>
+        <type>1</type>
+    </model>
+    <model>
+        <nameId>3</nameId>
+        <name>陈</name>
+        <type>1</type>
+    </model>
+    <model>
+        <nameId>4</nameId>
+        <name>王</name>
+        <type>1</type>
+    </model>
+</list>

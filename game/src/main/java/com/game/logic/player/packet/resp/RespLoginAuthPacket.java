@@ -75,6 +75,10 @@ public class RespLoginAuthPacket extends ResponsePacket {
         this.hasPlayer = hasPlayer;
     }
 
+    public boolean isHashPlayer() {
+        return hasPlayer;
+    }
+
     @Override
     protected void doResponse(Response response) {
         response.writeByte(status);

@@ -1,10 +1,13 @@
 package com.game.async.asyncdb;
 
+import org.springframework.stereotype.Component;
+
 /**
  * @Author: liguorui
  * @Date: 2020/9/19 6:51 下午
  */
-public class DefaultSyncStrategy implements  ISyncStrategy {
+@Component
+public class DefaultSyncStrategy implements ISyncStrategy {
 
     private int numEachLoop = 10;
 
@@ -16,7 +19,7 @@ public class DefaultSyncStrategy implements  ISyncStrategy {
 
     @Override
     public long getSleepTime(int waitingSize) {
-        if (waitingSize >50) {
+        if (waitingSize > 50) {
             return sleepTimeUpper50;
         }
         return sleepTime;

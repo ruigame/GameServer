@@ -25,7 +25,6 @@ public class AsyncDBService implements ApplicationContextAware, ICloseEvent {
      */
     private int threads = 16;
 
-    @Autowired
     private ExceptionCallback callback;
 
     @Autowired

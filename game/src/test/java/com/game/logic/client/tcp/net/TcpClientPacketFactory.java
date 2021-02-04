@@ -31,8 +31,10 @@ public class TcpClientPacketFactory {
             short packetId = packet.commandId();
             packets.put(packetId, (Class<? extends AbstractPacket>)packetClazz);
             try {
-                Class<?> codecClass = Class.forName(packetClazz.getName() + "Codec");
-                codecMap.put(packetId, (IPacketCodec)codecClass.newInstance());
+                if (packet.codec()) {
+                    Class<?> codecClass = Class.forName(packetClazz.getName() + "Codec");
+                    codecMap.put(packetId, (IPacketCodec) codecClass.newInstance());
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
